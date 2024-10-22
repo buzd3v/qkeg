@@ -17,14 +17,19 @@ class Swapchain
     void create(const vkb::PhysicalDevice &physDevice, const vkb::Device &device, VkSurfaceKHR &surface, int width,
                 int height);
 
-    void recreate(const vkb::Device &device, VkFormat format, uint32_t width, uint32_t height);
+    void recreate(const vkb::PhysicalDevice &physDevice, const vkb::Device &device, VkSurfaceKHR &surface, int width,
+                  int height);
 
-    void cleanUp();
+    void cleanUp(VkDevice device);
 
     // getter and setter
   public:
-    VkExtent2D getExtent() { return swapchain.extent; }
-    VkFormat   getImageFormat() { return swapchain.image_format; }
+    VkExtent2D  getExtent() { return swapchain.extent; }
+    VkFormat    getImageFormat() { return swapchain.image_format; }
+    VkImageView getImageView(std::size_t imageIndex) { return imageViews[imageIndex]; }
+    bool        needRecreate() const { return shouldRecreate; }
+
+    const std::vector<VkImage> &getImages() { return images; }
 
   private:
     SwapchainSupportDetails querySwapchainSupport(const vkb::PhysicalDevice &physDevice, VkSurfaceKHR &surface);
@@ -33,8 +38,8 @@ class Swapchain
     VkPresentModeKHR        choosePresentMode(SwapchainSupportDetails &swapchainSupport) const;
 
   private:
-    vkb::Swapchain swapchain{};
-
+    vkb::Swapchain           swapchain{};
     std::vector<VkImage>     images;
     std::vector<VkImageView> imageViews;
+    bool                     shouldRecreate{false};
 };

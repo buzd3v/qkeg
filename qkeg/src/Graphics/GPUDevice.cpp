@@ -79,4 +79,22 @@ void GPUDevice::initVulkan(GLFWwindow *window, const char *appName, const Versio
 
     graphicsQueueFamily = device.get_queue_index(vkb::QueueType::graphics).value();
     graphicsQueue       = device.get_queue(vkb::QueueType::graphics).value();
+
+    { // init vma
+        const auto vulkanFunctions = VmaVulkanFunctions{
+            .vkGetInstanceProcAddr = vkGetInstanceProcAddr,
+            .vkGetDeviceProcAddr   = vkGetDeviceProcAddr,
+        };
+
+        const auto allocatorCreateInfo = VmaAllocatorCreateInfo{
+            .flags            = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT,
+            .physicalDevice   = physicalDevice,
+            .device           = device,
+            .pVulkanFunctions = &vulkanFunctions,
+            .instance         = instance,
+            .vulkanApiVersion = VK_API_VERSION_1_3,
+        };
+
+        vmaCreateAllocator(&allocatorCreateInfo, &allocator);
+    }
 }

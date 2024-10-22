@@ -107,3 +107,53 @@ void Swapchain::create(const vkb::PhysicalDevice &physDevice, const vkb::Device 
     images     = swapchain.get_images().value();
     imageViews = swapchain.get_image_views().value();
 }
+
+void Swapchain::recreate(const vkb::PhysicalDevice &physDevice, const vkb::Device &device, VkSurfaceKHR &surface,
+                         int width, int height)
+{
+    assert(swapchain && "Swapchain do not exist!");
+    SwapchainSupportDetails swapchainSupport = querySwapchainSupport(physDevice, surface);
+
+    auto result = vkb::SwapchainBuilder{device}
+                      .set_old_swapchain(swapchain)
+                      .set_desired_format(chooseSurfaceFormat(swapchainSupport))
+                      .set_desired_present_mode(swapchain.present_mode)
+                      .set_desired_extent(chooseSwapExtend(swapchainSupport, width, height).width,
+                                          chooseSwapExtend(swapchainSupport, width, height).height)
+                      .add_image_usage_flags(VK_IMAGE_USAGE_TRANSFER_DST_BIT)
+                      .build();
+
+    if (!result.has_value())
+    {
+        throw std::runtime_error(fmt::format("failed to recreate swapchain: error = {}, vk result = {}",
+                                             result.full_error().type.message(),
+                                             string_VkResult(result.full_error().vk_result)));
+    };
+
+    vkb::destroy_swapchain(swapchain);
+    for (auto imageView : imageViews)
+    {
+        vkDestroyImageView(device, imageView, nullptr);
+    }
+
+    swapchain  = result.value();
+    images     = swapchain.get_images().value();
+    imageViews = swapchain.get_image_views().value();
+
+    shouldRecreate = false;
+}
+
+void Swapchain::cleanUp(VkDevice device)
+{
+    { // destroy images and swapchain
+        for (auto &image : images)
+        {
+            vkDestroyImage(device, image, nullptr);
+        }
+        for (auto &imageview : imageViews)
+        {
+            vkDestroyImageView(device, imageview, nullptr);
+        }
+        vkb::destroy_swapchain(swapchain);
+    }
+}
