@@ -1,0 +1,5 @@
+# CMake generation dependency list for this directory.
+C:/Users/kanas/scoop/apps/cmake/3.29.0/share/cmake-3.29/Modules/FindPackageHandleStandardArgs.cmake
+C:/Users/kanas/scoop/apps/cmake/3.29.0/share/cmake-3.29/Modules/FindPackageMessage.cmake
+C:/Users/kanas/scoop/apps/cmake/3.29.0/share/cmake-3.29/Modules/FindVulkan.cmake
+E:/qkeg/qkeg/third_party/volk/CMakeLists.txt

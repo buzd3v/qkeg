@@ -1,0 +1,10 @@
+^E:\QKEG\QKEG\THIRD_PARTY\GLM\GLM\CMAKELISTS.TXT
+setlocal
+C:\Users\kanas\scoop\apps\cmake\3.29.0\bin\cmake.exe -SE:/qkeg -BE:/qkeg/build --check-stamp-file E:/qkeg/build/qkeg/third_party/glm/glm/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

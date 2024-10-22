@@ -1,0 +1,23 @@
+[submodule "qkeg/third_party/glm"]
+	path = qkeg/third_party/glm
+	url = https://github.com/g-truc/glm
+
+[submodule "qkeg/third_party/glfw"]
+	path = qkeg/third_party/glfw
+	url = https://github.com/glfw/glfw
+
+[submodule "qkeg/third_party/json"]
+	path = qkeg/third_party/json
+	url = https://github.com/nlohmann/json
+[submodule "qkeg/third_party/fmt"]
+	path = qkeg/third_party/fmt
+	url = https://github.com/fmtlib/fmt
+[submodule "qkeg/third_party/vk-bootstrap"]
+	path = qkeg/third_party/vk-bootstrap
+	url = https://github.com/charles-lunarg/vk-bootstrap.git
+[submodule "qkeg/third_party/volk"]
+	path = qkeg/third_party/volk
+	url = https://github.com/zeux/volk.git
+[submodule "qkeg/third_party/vma"]
+	path = qkeg/third_party/vma
+	url = https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git

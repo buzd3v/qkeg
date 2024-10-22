@@ -1,0 +1,45 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"install"
+		],
+		"files" : 
+		[
+			"qkeg/third_party/glfw/src/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 363,
+				"parent" : 0
+			}
+		]
+	},
+	"installers" : 
+	[
+		{
+			"backtrace" : 1,
+			"component" : "Unspecified",
+			"destination" : "lib",
+			"paths" : 
+			[
+				"qkeg/third_party/glfw/src/MinSizeRel/glfw3.lib"
+			],
+			"targetId" : "glfw::@e85097057e51eb501417",
+			"targetIndex" : 15,
+			"type" : "target"
+		}
+	],
+	"paths" : 
+	{
+		"build" : "qkeg/third_party/glfw/src",
+		"source" : "qkeg/third_party/glfw/src"
+	}
+}
