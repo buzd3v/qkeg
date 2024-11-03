@@ -7,5 +7,6 @@ int main()
     game.init({});
 
     game.run();
+    game.cleanup();
     return 0;
 }

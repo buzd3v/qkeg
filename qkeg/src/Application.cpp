@@ -102,7 +102,26 @@ void Application::run()
             inputManager.onNewFrame(); // reset input state on new frame
             glfwPollEvents();          // manage glfw window polling
         }
+
+        // drawPhase
+
+        {
+            if (!gpuDevice.needSwapchainRecreate())
+            {
+                customDraw();
+            }
+            else
+            {
+                int width, height;
+                glfwGetFramebufferSize(window, &width, &height);
+                params.windowSize = {width, height};
+                gpuDevice.recreateSwapchain(width, height);
+            }
+        }
     }
 }
 
-void Application::cleanup() {}
+void Application::cleanup()
+{
+    gpuDevice.cleanUp();
+}

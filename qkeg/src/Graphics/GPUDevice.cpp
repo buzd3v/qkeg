@@ -1,9 +1,13 @@
 #define VOLK_IMPLEMENTATION
+#define VMA_IMPLEMENTATION
 
 #include "Graphics/GPUDevice.h"
-#include "Graphics/Vulkan/Util.h"
+#include "Graphics/Vulkan/VkUtil.h"
 
+#include "Graphics/Vulkan/VkInitializer.h"
 #include <GLFW/glfw3.h>
+
+void GPUDevice::cleanUp() {}
 
 void GPUDevice::init(GLFWwindow *window, const char *appName, const Version &version)
 {
@@ -13,6 +17,8 @@ void GPUDevice::init(GLFWwindow *window, const char *appName, const Version &ver
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);
     swapchain.create(physicalDevice, device, surface, static_cast<uint32_t>(width), static_cast<uint32_t>(height));
+    swapchain.initSyncStructures(device.device);
+    createCommandBuffers();
 }
 
 void GPUDevice::initVulkan(GLFWwindow *window, const char *appName, const Version &version)
@@ -50,8 +56,14 @@ void GPUDevice::initVulkan(GLFWwindow *window, const char *appName, const Versio
         .samplerAnisotropy = VK_TRUE,
     };
 
-    const auto deviceFeatures12 = VkPhysicalDeviceVulkan12Features{};
-    const auto deviceFeatures13 = VkPhysicalDeviceVulkan13Features{};
+    const auto deviceFeatures12 = VkPhysicalDeviceVulkan12Features{
+        .descriptorIndexing  = true,
+        .bufferDeviceAddress = true,
+    };
+    const auto deviceFeatures13 = VkPhysicalDeviceVulkan13Features{
+        .synchronization2 = true,
+        .dynamicRendering = true,
+    };
 
     physicalDevice = vkb::PhysicalDeviceSelector{instance}
                          .set_minimum_version(1, 2)
@@ -97,4 +109,74 @@ void GPUDevice::initVulkan(GLFWwindow *window, const char *appName, const Versio
 
         vmaCreateAllocator(&allocatorCreateInfo, &allocator);
     }
+}
+VkCommandBuffer GPUDevice::beginFrame()
+{
+    swapchain.beginFrame(device, getCurrentFrameIndex());
+
+    const auto &frame       = getCurrentFrame();
+    const auto &cmdBuf      = frame.mainCommandBuffer;
+    const auto  cmdbeginInf = VkInitializer::commandBufferBeginInfo(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
+
+    VK_CHECK(vkResetCommandBuffer(cmdBuf, 0));
+    VK_CHECK(vkBeginCommandBuffer(cmdBuf, &cmdbeginInf));
+
+    return cmdBuf;
+}
+
+void GPUDevice::endFrame(VkCommandBuffer &cmdBuf, const GPUImage &drawImage)
+{
+    auto [image, imageIndex] = swapchain.acquireSwapchainImage(device.device, getCurrentFrameIndex());
+    if (image == VK_NULL_HANDLE)
+    {
+        return;
+    }
+    swapchain.resetFence(device, getCurrentFrameIndex());
+
+    // re-formatting image layout
+    {
+        VkUtil::transitionImage(cmdBuf, image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
+
+        // make a clear color image
+        VkClearColorValue clearValue;
+
+        float flash = std::abs(std::sin(frameNumber / 120.f));
+        clearValue  = {{0.0f, 0.0f, flash, 1.0f}};
+
+        VkImageSubresourceRange clearRange = VkInitializer::imageSubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT);
+        // clear image
+        vkCmdClearColorImage(cmdBuf, image, VK_IMAGE_LAYOUT_GENERAL, &clearValue, 1, &clearRange);
+    }
+    // make the swapchain image into presentable mode
+    VkUtil::transitionImage(cmdBuf, image, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+
+    // end the command buffer
+    VK_CHECK(vkEndCommandBuffer(cmdBuf));
+
+    // present
+    {
+        swapchain.submitAndPresent(cmdBuf, graphicsQueue, getCurrentFrameIndex(), imageIndex);
+    }
+
+    // counting frame number
+    frameNumber++;
+}
+
+void GPUDevice::createCommandBuffers()
+{
+    VkCommandPoolCreateInfo commandPoolInfo =
+        VkInitializer::commandPoolCreateInfo(graphicsQueueFamily, VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
+
+    for (int i = 0; i < FRAME_ON_FLIGHT; i++)
+    {
+        VK_CHECK(vkCreateCommandPool(device, &commandPoolInfo, nullptr, &frames[i].commandPool));
+        const VkCommandBufferAllocateInfo cmdAllocInfo = VkInitializer::commandBufferAlocInfo(frames[i].commandPool, 1);
+        VK_CHECK(vkAllocateCommandBuffers(device, &cmdAllocInfo, &frames[i].mainCommandBuffer));
+    }
+}
+
+void GPUDevice::recreateSwapchain(std::uint32_t width, std::uint32_t height)
+{
+    VK_CHECK(vkDeviceWaitIdle(device));
+    swapchain.recreate(physicalDevice, device, surface, width, height);
 }

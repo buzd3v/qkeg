@@ -27,6 +27,10 @@ void Game::customInit()
 
 void Game::customUpdate(float dt) {}
 
-void Game::customDraw() {}
+void Game::customDraw()
+{
+    auto cmd = gpuDevice.beginFrame();
+    gpuDevice.endFrame(cmd, GPUImage());
+}
 
 void Game::customCleanup() {}

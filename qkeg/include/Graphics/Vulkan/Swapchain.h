@@ -4,6 +4,9 @@
 #include <volk.h>
 #include <VkBootstrap.h>
 // clang-format on
+#include "Core/DeletionQueue.h"
+#include "VkInitializer.h"
+#include "VkUtil.h"
 
 struct SwapchainSupportDetails
 {
@@ -11,17 +14,24 @@ struct SwapchainSupportDetails
     std::vector<VkSurfaceFormatKHR> formats;
     std::vector<VkPresentModeKHR>   presentModes;
 };
+
 class Swapchain
 {
   public:
     void create(const vkb::PhysicalDevice &physDevice, const vkb::Device &device, VkSurfaceKHR &surface, int width,
                 int height);
-
     void recreate(const vkb::PhysicalDevice &physDevice, const vkb::Device &device, VkSurfaceKHR &surface, int width,
                   int height);
 
-    void cleanUp(VkDevice device);
+    void beginFrame(VkDevice device, std::uint32_t frameIndex);
+    void resetFence(VkDevice device, std::uint32_t frameIndex);
+    void initSyncStructures(const VkDevice &device);
 
+    std::pair<VkImage, std::uint32_t> acquireSwapchainImage(VkDevice &device, std::uint32_t frameIndex);
+    void submitAndPresent(VkCommandBuffer &cmd, VkQueue &graphicsQueue, std::size_t frameIndex,
+                          std::uint32_t swapchainImageIndex);
+
+    void cleanUp(VkDevice device);
     // getter and setter
   public:
     VkExtent2D  getExtent() { return swapchain.extent; }
@@ -30,6 +40,13 @@ class Swapchain
     bool        needRecreate() const { return shouldRecreate; }
 
     const std::vector<VkImage> &getImages() { return images; }
+
+  private:
+    struct FrameData
+    {
+        VkSemaphore swapchainSemaphore, renderSemaphore;
+        VkFence     renderFence;
+    };
 
   private:
     SwapchainSupportDetails querySwapchainSupport(const vkb::PhysicalDevice &physDevice, VkSurfaceKHR &surface);
@@ -42,4 +59,8 @@ class Swapchain
     std::vector<VkImage>     images;
     std::vector<VkImageView> imageViews;
     bool                     shouldRecreate{false};
+
+    std::array<FrameData, Graphics::FRAME_ON_FLIGHT> frames;
+
+    DeletionQueue deletionQueue;
 };

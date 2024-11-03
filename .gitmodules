@@ -21,3 +21,7 @@
 [submodule "qkeg/third_party/vma"]
 	path = qkeg/third_party/vma
 	url = https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git
+
+[submodule "qkeg/third_party/stb"]
+	path = qkeg/third_party/stb
+	url = https://github.com/gracicot/stb-cmake

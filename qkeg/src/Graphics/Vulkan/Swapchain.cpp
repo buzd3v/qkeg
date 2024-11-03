@@ -6,6 +6,8 @@
 #include <fmt/format.h>
 #include <vulkan/vk_enum_string_helper.h>
 
+static const uint64_t TIME_OUT = 1000000000;
+
 SwapchainSupportDetails Swapchain::querySwapchainSupport(const vkb::PhysicalDevice &physDevice, VkSurfaceKHR &surface)
 {
     VkPhysicalDevice        device = physDevice.physical_device;
@@ -155,5 +157,81 @@ void Swapchain::cleanUp(VkDevice device)
             vkDestroyImageView(device, imageview, nullptr);
         }
         vkb::destroy_swapchain(swapchain);
+    }
+}
+
+void Swapchain::beginFrame(VkDevice device, std::uint32_t frameIndex)
+{
+    VK_CHECK(vkWaitForFences(device, 1, &frames[frameIndex].renderFence, true, TIME_OUT));
+}
+
+void Swapchain::resetFence(VkDevice device, std::uint32_t frameIndex)
+{
+    VK_CHECK(vkResetFences(device, 1, &frames[frameIndex].renderFence));
+}
+
+std::pair<VkImage, std::uint32_t> Swapchain::acquireSwapchainImage(VkDevice &device, std::uint32_t frameIndex)
+{
+    std::uint32_t swapchainImageIndex{};
+    const auto    result = vkAcquireNextImageKHR(
+        device, swapchain, TIME_OUT, frames[frameIndex].swapchainSemaphore, nullptr, &swapchainImageIndex);
+
+    if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
+    {
+        shouldRecreate = true;
+        return {images[swapchainImageIndex], swapchainImageIndex};
+    }
+    else if (result != VK_SUCCESS)
+    {
+        throw(std::runtime_error("failed to acquire swapchain image!"));
+    }
+
+    return {images[swapchainImageIndex], swapchainImageIndex};
+}
+
+void Swapchain::initSyncStructures(const VkDevice &device)
+{
+    VkFenceCreateInfo     fenceCreateInfo     = VkInitializer::fenceCreateInfo(VK_FENCE_CREATE_SIGNALED_BIT);
+    VkSemaphoreCreateInfo semaphoreCreateInfo = VkInitializer::semaphoreCreateInfo();
+
+    for (int i = 0; i < Graphics::FRAME_ON_FLIGHT; i++)
+    {
+        VK_CHECK(vkCreateFence(device, &fenceCreateInfo, nullptr, &frames[i].renderFence));
+        VK_CHECK(vkCreateSemaphore(device, &semaphoreCreateInfo, nullptr, &frames[i].swapchainSemaphore));
+        VK_CHECK(vkCreateSemaphore(device, &semaphoreCreateInfo, nullptr, &frames[i].renderSemaphore));
+    }
+}
+
+void Swapchain::submitAndPresent(VkCommandBuffer &cmd, VkQueue &graphicsQueue, std::size_t frameIndex,
+                                 std::uint32_t swapchainImageIndex)
+{
+    auto frame = frames[frameIndex];
+
+    // submit term
+    {
+        auto submitInfo = VkInitializer::commandBufferSubmitInfo(cmd);
+        auto waitInfo   = VkInitializer::semaphoreSubmitInfo(VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT_KHR,
+                                                           frame.swapchainSemaphore);
+        auto signalInfo =
+            VkInitializer::semaphoreSubmitInfo(VK_PIPELINE_STAGE_2_ALL_GRAPHICS_BIT, frame.renderSemaphore);
+        const auto submit = VkInitializer::submitInfo(&submitInfo, &signalInfo, &waitInfo);
+
+        VK_CHECK(vkQueueSubmit2(graphicsQueue, 1, &submit, frame.renderFence));
+    }
+
+    // present
+    {
+        auto presentInfo =
+            VkInitializer::presentInfo(&swapchain.swapchain, &frame.renderSemaphore, &swapchainImageIndex);
+
+        auto result = vkQueuePresentKHR(graphicsQueue, &presentInfo);
+        if (result == VK_SUBOPTIMAL_KHR)
+        {
+            shouldRecreate = true;
+        }
+        else if (result != VK_SUCCESS)
+        {
+            fmt::println("Cannot present: {}", string_VkResult(result));
+        }
     }
 }

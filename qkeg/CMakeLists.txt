@@ -20,6 +20,18 @@ add_library(qkeg
   # graphics files
   src/Graphics/GPUDevice.cpp
   src/Graphics/Vulkan/Swapchain.cpp
+  src/Graphics/Vulkan/GPUImage.cpp
+  src/Graphics/Vulkan/VkInitializer.cpp
+  src/Graphics/Vulkan/ImagePool.cpp
+  src/Graphics/Vulkan/VkUtil.cpp
+  src/Graphics/Vulkan/PipelineBuilder.cpp
+  src/Graphics/Vulkan/BindlessDescriptor.cpp
+  src/Graphics/Vulkan/ImageStream.cpp
+
+  # pipeline files
+  src/Graphics/Pipeline/GradientPipeline.cpp
+
+  src/Graphics/GameRenderer.cpp
 )
 
 add_library(qkeg::qkeg ALIAS qkeg)
@@ -34,7 +46,9 @@ target_add_extra_warnings(qkeg)
 target_include_directories(qkeg
   PUBLIC
   "${CMAKE_CURRENT_LIST_DIR}/include"
+  "${CMAKE_CURRENT_LIST_DIR}/include/Graphics"
 
+  # "${CMAKE_CURRENT_LIST_DIR}/include"
   PRIVATE
   ${Vulkan_INCLUDE_DIRS}
 )

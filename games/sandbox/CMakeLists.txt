@@ -1,3 +1,4 @@
+include(CMakePrintHelpers)
 cmake_minimum_required(VERSION 3.21)
 
 project(
@@ -34,8 +35,9 @@ target_link_libraries(sandbox PRIVATE
 symlink_assets(sandbox)
 
 # build shaders
-# get_edbr_common_3d_shaders(EDBR_3D_SHADERS)
-# target_shaders(mtpgame "${EDBR_3D_SHADERS}")
+get_qkeg_common_3d_shaders(QKEG_3D_SHADERS)
+message(STATUS "${QKEG_3D_SHADERS}")
+target_shaders(sandbox "${QKEG_3D_SHADERS}")
 
 # set_exe_target_common_props(mtpgame)
 
