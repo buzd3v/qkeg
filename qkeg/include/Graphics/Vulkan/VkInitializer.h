@@ -27,6 +27,7 @@ VkSubmitInfo2         submitInfo(VkCommandBufferSubmitInfo *cmd, VkSemaphoreSubm
 VkPresentInfoKHR      presentInfo(VkSwapchainKHR *pSwapchain, VkSemaphore *pWaitSemaphore, uint32_t *imageIndex,
                                   VkPresentInfoKHR *pNext = nullptr);
 
-VkImageSubresourceRange imageSubresourceRange(VkImageAspectFlags aspectMask);
+VkImageSubresourceRange         imageSubresourceRange(VkImageAspectFlags aspectMask);
+VkPipelineShaderStageCreateInfo shaderStageCreateInfo(VkShaderStageFlagBits flags, VkShaderModule module);
 
 }; // namespace VkInitializer

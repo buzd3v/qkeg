@@ -18,8 +18,8 @@ void BindlessDescriptor::init(VkDevice device, float maxAnisotropy)
 
         const auto poolInfo = VkDescriptorPoolCreateInfo{
             .sType         = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-            .flags         = VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT_EXT,
-            .maxSets       = k_max_bindless_resouces * poolSizeBindless.size(),
+            .flags         = VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT,
+            .maxSets       = k_max_bindless_resouces * (std::uint32_t)poolSizeBindless.size(),
             .poolSizeCount = (std::uint32_t)poolSizeBindless.size(),
             .pPoolSizes    = poolSizeBindless.data(),
         };
@@ -29,9 +29,8 @@ void BindlessDescriptor::init(VkDevice device, float maxAnisotropy)
 
     { // Descriptor Layout Creation
 
-        VkDescriptorBindingFlags bindlessFlags = VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT |
-                                                 VK_DESCRIPTOR_BINDING_VARIABLE_DESCRIPTOR_COUNT_BIT |
-                                                 VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT;
+        VkDescriptorBindingFlags bindlessFlags =
+            VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT | VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT;
         const auto bindingFlags = std::array{bindlessFlags, bindlessFlags};
 
         const auto bindings = std::array<VkDescriptorSetLayoutBinding, 2>{{
@@ -68,17 +67,17 @@ void BindlessDescriptor::init(VkDevice device, float maxAnisotropy)
 
     { // alloc descriptor set
 
-        auto maxBinding = std::array<uint32_t, 2>{k_max_bindless_resouces - 1, k_max_sampler - 1};
-
-        const auto countInfo = VkDescriptorSetVariableDescriptorCountAllocateInfo{
-            .sType              = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_ALLOCATE_INFO,
-            .descriptorSetCount = (std::uint32_t)maxBinding.size(),
-            .pDescriptorCounts  = maxBinding.data(),
+        // auto maxBinding = std::array<uint32_t, 2>{k_max_bindless_resouces - 1, k_max_sampler - 1};
+        std::uint32_t maxBinding = k_max_bindless_resouces - 1;
+        const auto    countInfo  = VkDescriptorSetVariableDescriptorCountAllocateInfo{
+                .sType              = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_ALLOCATE_INFO,
+                .descriptorSetCount = 1,
+                .pDescriptorCounts  = &maxBinding,
         };
 
         const auto allocInfo = VkDescriptorSetAllocateInfo{
             .sType              = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
-            .pNext              = &countInfo,
+            .pNext              = nullptr,
             .descriptorPool     = bindlessPool,
             .descriptorSetCount = 1,
             .pSetLayouts        = &bindlessLayout,
@@ -169,9 +168,15 @@ void BindlessDescriptor::addSampler(VkDevice device, std::uint32_t id, VkSampler
         .dstBinding      = k_sampler_binding,
         .dstArrayElement = id,
         .descriptorCount = 1,
-        .descriptorType  = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
+        .descriptorType  = VK_DESCRIPTOR_TYPE_SAMPLER,
         .pImageInfo      = &imageInfo,
     };
 
     vkUpdateDescriptorSets(device, 1, &writeset, 0, nullptr);
+}
+
+void BindlessDescriptor::bindBindlessSet(VkCommandBuffer cmd, VkPipelineLayout layout, VkPipelineBindPoint bindPoint)
+{
+
+    vkCmdBindDescriptorSets(cmd, bindPoint, layout, 0, 1, &bindlessSet, 0, nullptr);
 }

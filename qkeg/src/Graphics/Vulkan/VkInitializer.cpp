@@ -128,4 +128,13 @@ VkImageSubresourceRange imageSubresourceRange(VkImageAspectFlags aspectMask)
     return subImage;
 }
 
+VkPipelineShaderStageCreateInfo VkInitializer::shaderStageCreateInfo(VkShaderStageFlagBits flags, VkShaderModule module)
+{
+    return VkPipelineShaderStageCreateInfo{
+        .sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+        .stage  = flags,
+        .module = module,
+        .pName  = "main",
+    };
+}
 } // namespace VkInitializer

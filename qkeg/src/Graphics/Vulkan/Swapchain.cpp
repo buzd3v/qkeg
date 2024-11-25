@@ -2,11 +2,10 @@
 
 #define VOLK_IMPLEMENTATION
 
+#include <Vulkan/VkUtil.h>
 #include <algorithm>
 #include <fmt/format.h>
 #include <vulkan/vk_enum_string_helper.h>
-
-static const uint64_t TIME_OUT = 1000000000;
 
 SwapchainSupportDetails Swapchain::querySwapchainSupport(const vkb::PhysicalDevice &physDevice, VkSurfaceKHR &surface)
 {
@@ -147,11 +146,13 @@ void Swapchain::recreate(const vkb::PhysicalDevice &physDevice, const vkb::Devic
 
 void Swapchain::cleanUp(VkDevice device)
 {
+    for (auto &frame : frames)
+    {
+        vkDestroyFence(device, frame.renderFence, nullptr);
+        vkDestroySemaphore(device, frame.swapchainSemaphore, nullptr);
+        vkDestroySemaphore(device, frame.renderSemaphore, nullptr);
+    }
     { // destroy images and swapchain
-        for (auto &image : images)
-        {
-            vkDestroyImage(device, image, nullptr);
-        }
         for (auto &imageview : imageViews)
         {
             vkDestroyImageView(device, imageview, nullptr);
@@ -162,7 +163,7 @@ void Swapchain::cleanUp(VkDevice device)
 
 void Swapchain::beginFrame(VkDevice device, std::uint32_t frameIndex)
 {
-    VK_CHECK(vkWaitForFences(device, 1, &frames[frameIndex].renderFence, true, TIME_OUT));
+    VK_CHECK(vkWaitForFences(device, 1, &frames[frameIndex].renderFence, true, VkUtil::TIMEOUT));
 }
 
 void Swapchain::resetFence(VkDevice device, std::uint32_t frameIndex)
@@ -174,7 +175,7 @@ std::pair<VkImage, std::uint32_t> Swapchain::acquireSwapchainImage(VkDevice &dev
 {
     std::uint32_t swapchainImageIndex{};
     const auto    result = vkAcquireNextImageKHR(
-        device, swapchain, TIME_OUT, frames[frameIndex].swapchainSemaphore, nullptr, &swapchainImageIndex);
+        device, swapchain, VkUtil::TIMEOUT, frames[frameIndex].swapchainSemaphore, nullptr, &swapchainImageIndex);
 
     if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
     {

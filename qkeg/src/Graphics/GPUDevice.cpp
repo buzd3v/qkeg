@@ -4,10 +4,27 @@
 #include "Graphics/GPUDevice.h"
 #include "Graphics/Vulkan/VkUtil.h"
 
+#include "GPUDevice.h"
 #include "Graphics/Vulkan/VkInitializer.h"
 #include <GLFW/glfw3.h>
 
-void GPUDevice::cleanUp() {}
+void GPUDevice::cleanUp()
+{
+    for (auto &frame : frames)
+    {
+        vkDestroyCommandPool(device, frame.commandPool, 0);
+    }
+
+    VkExcutor::GetInstance()->cleanup(device);
+    BindlessDescriptor::GetInstance()->cleanUp(device);
+    ImagePool::GetInstance()->destroyAll();
+
+    swapchain.cleanUp(device);
+    vmaDestroyAllocator(allocator);
+    vkb::destroy_surface(instance, surface);
+    vkb::destroy_device(device);
+    vkb::destroy_instance(instance);
+}
 
 void GPUDevice::init(GLFWwindow *window, const char *appName, const Version &version)
 {
@@ -19,6 +36,9 @@ void GPUDevice::init(GLFWwindow *window, const char *appName, const Version &ver
     swapchain.create(physicalDevice, device, surface, static_cast<uint32_t>(width), static_cast<uint32_t>(height));
     swapchain.initSyncStructures(device.device);
     createCommandBuffers();
+
+    queryDeviceCapabilities();
+    initSingletonComponent();
 }
 
 void GPUDevice::initVulkan(GLFWwindow *window, const char *appName, const Version &version)
@@ -57,8 +77,15 @@ void GPUDevice::initVulkan(GLFWwindow *window, const char *appName, const Versio
     };
 
     const auto deviceFeatures12 = VkPhysicalDeviceVulkan12Features{
-        .descriptorIndexing  = true,
-        .bufferDeviceAddress = true,
+        .descriptorIndexing                           = true,
+        .descriptorBindingSampledImageUpdateAfterBind = true,
+        .descriptorBindingStorageImageUpdateAfterBind = true,
+        .descriptorBindingPartiallyBound              = true,
+        .descriptorBindingVariableDescriptorCount     = true,
+        .runtimeDescriptorArray                       = true,
+        .scalarBlockLayout                            = true,
+        .bufferDeviceAddress                          = true,
+
     };
     const auto deviceFeatures13 = VkPhysicalDeviceVulkan13Features{
         .synchronization2 = true,
@@ -110,6 +137,55 @@ void GPUDevice::initVulkan(GLFWwindow *window, const char *appName, const Versio
         vmaCreateAllocator(&allocatorCreateInfo, &allocator);
     }
 }
+void GPUDevice::initSingletonComponent()
+{
+    { // construct ImagePool -> for image management
+        ImagePool::Construct(*this);
+    }
+
+    { // construct an immediately excutor, command once used by this class will be
+        // excutte immediately
+        VkExcutor::Construct();
+        VkExcutor::GetInstance()->init(device, graphicsQueue, graphicsQueueFamily);
+    }
+
+    { // construct BindlessDescriptor
+        BindlessDescriptor::Construct();
+        BindlessDescriptor::GetInstance()->init(device, maxAnisotropy);
+    }
+}
+void GPUDevice::queryDeviceCapabilities()
+{
+    // check limits
+    VkPhysicalDeviceProperties props{};
+    vkGetPhysicalDeviceProperties(physicalDevice, &props);
+
+    maxAnisotropy = props.limits.maxSamplerAnisotropy;
+
+    { // store which sampling counts HW supports
+        const auto counts = std::array{
+            VK_SAMPLE_COUNT_1_BIT,
+            VK_SAMPLE_COUNT_2_BIT,
+            VK_SAMPLE_COUNT_4_BIT,
+            VK_SAMPLE_COUNT_8_BIT,
+            VK_SAMPLE_COUNT_16_BIT,
+            VK_SAMPLE_COUNT_32_BIT,
+            VK_SAMPLE_COUNT_64_BIT,
+        };
+
+        const auto supportedByDepthAndColor =
+            props.limits.framebufferColorSampleCounts & props.limits.framebufferDepthSampleCounts;
+        supportSamplesCount = {};
+        for (const auto &count : counts)
+        {
+            if (supportedByDepthAndColor & count)
+            {
+                supportSamplesCount = (VkSampleCountFlagBits)(supportSamplesCount | count);
+                highestSampleCount  = count;
+            }
+        }
+    }
+}
 VkCommandBuffer GPUDevice::beginFrame()
 {
     swapchain.beginFrame(device, getCurrentFrameIndex());
@@ -124,7 +200,7 @@ VkCommandBuffer GPUDevice::beginFrame()
     return cmdBuf;
 }
 
-void GPUDevice::endFrame(VkCommandBuffer &cmdBuf, const GPUImage &drawImage)
+void GPUDevice::endFrame(VkCommandBuffer &cmdBuf, const GPUImage &drawImage, FrameProperties frameProps)
 {
     auto [image, imageIndex] = swapchain.acquireSwapchainImage(device.device, getCurrentFrameIndex());
     if (image == VK_NULL_HANDLE)
@@ -132,24 +208,51 @@ void GPUDevice::endFrame(VkCommandBuffer &cmdBuf, const GPUImage &drawImage)
         return;
     }
     swapchain.resetFence(device, getCurrentFrameIndex());
-
+    VkImageLayout currentLayout;
     // re-formatting image layout
     {
-        VkUtil::transitionImage(cmdBuf, image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
-
-        // make a clear color image
-        VkClearColorValue clearValue;
-
-        float flash = std::abs(std::sin(frameNumber / 120.f));
-        clearValue  = {{0.0f, 0.0f, flash, 1.0f}};
-
+        // reformatting swapchain image for available to write
         VkImageSubresourceRange clearRange = VkInitializer::imageSubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT);
+        VkUtil::transitionImage(cmdBuf, image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
+        currentLayout = VK_IMAGE_LAYOUT_GENERAL;
+        // make a clear color image
+        VkClearColorValue clearValue{frameProps.clearColor.red,
+                                     frameProps.clearColor.green,
+                                     frameProps.clearColor.blue,
+                                     frameProps.clearColor.alpha};
+
         // clear image
         vkCmdClearColorImage(cmdBuf, image, VK_IMAGE_LAYOUT_GENERAL, &clearValue, 1, &clearRange);
     }
-    // make the swapchain image into presentable mode
-    VkUtil::transitionImage(cmdBuf, image, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 
+    // copy image to swapchain
+    if (frameProps.copyImageToSwapchain)
+    {
+        // change drawImage and swapchainimage format to availlable to copy
+        VkUtil::transitionImage(
+            cmdBuf, drawImage.image, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+        VkUtil::transitionImage(cmdBuf, image, currentLayout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+
+        currentLayout      = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+        const auto sampler = frameProps.linearSampler ? VK_FILTER_LINEAR : VK_FILTER_NEAREST;
+        //
+        // copy to swapchainImage
+        if (frameProps.blitRect != glm::ivec4{})
+        {
+            VkUtil::copyImageToImage(
+                cmdBuf, drawImage.image, image, drawImage.getExtent2D(), swapchain.getExtent(), sampler);
+        }
+        else
+        {
+            VkUtil::copyImageToImage(
+                cmdBuf, drawImage.image, image, drawImage.getExtent2D(), swapchain.getExtent(), sampler);
+        }
+    }
+
+    // make the swapchain image into presentable mode
+    VkUtil::transitionImage(cmdBuf, image, currentLayout, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+    // VkUtil::transitionImage(
+    //     cmdBuf, drawImage.image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
     // end the command buffer
     VK_CHECK(vkEndCommandBuffer(cmdBuf));
 
@@ -173,6 +276,12 @@ void GPUDevice::createCommandBuffers()
         const VkCommandBufferAllocateInfo cmdAllocInfo = VkInitializer::commandBufferAlocInfo(frames[i].commandPool, 1);
         VK_CHECK(vkAllocateCommandBuffers(device, &cmdAllocInfo, &frames[i].mainCommandBuffer));
     }
+}
+
+GPUImage GPUDevice::queryImage(ImageId id)
+{
+    auto *pool = ImagePool::GetInstance();
+    return pool->getImage(id);
 }
 
 void GPUDevice::recreateSwapchain(std::uint32_t width, std::uint32_t height)

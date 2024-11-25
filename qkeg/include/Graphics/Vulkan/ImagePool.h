@@ -1,35 +1,52 @@
 #pragma once
-#include "BindlessDescriptor.h"
+// #include "BindlessDescriptor.h"
 #include "GPUImage.h"
 
 #include <filesystem>
+#include <singleton_atomic.hpp>
 #include <string>
 #include <unordered_map>
 
-using ImageId = uint32_t;
 class GPUDevice;
-class ImagePool
+class ImagePool : public SingletonAtomic<ImagePool>
 {
   public:
     ImagePool(GPUDevice &device);
-    void loadImageRaw(std::filesystem::path &path, VkFormat &format, VkImageUsageFlags flags, bool mipMap);
 
-    ImageId addImage(GPUImage &image, ImageId = GPUImage::NULL_BINDLESS_ID);
+    ImageId loadImageFromFile(std::filesystem::path &path, VkFormat format, VkImageUsageFlags flags, bool mipMap);
 
-    const GPUImage       &getImage(ImageId id) const;
+    // query an image with id
+    const GPUImage &getImage(ImageId id) const;
+
+    // a drawable null image
+    [[nodiscard]] ImageId createImage(GPUImageCreateInfo &info, ImageId id = qTypes::NULL_IMAGE_ID);
+
+    // request for a new ImageId
     [[nodiscard]] ImageId requestImageId() const;
-    void                  destroyAll();
+
+    // destroy all image
+    void destroyAll();
+
+  private:
+    ImageId addImage(GPUImage image, ImageId = GPUImage::NULL_BINDLESS_ID);
 
   private:
     std::vector<GPUImage> images;
+    std::vector<GPUImage> deletedImages;
     GPUDevice            &device;
-
     struct ImageProperties
     {
         std::filesystem::path path;
         VkFormat              format;
         VkImageUsageFlags     flags;
         bool                  mimap;
+
+        bool operator==(ImageProperties &other)
+        {
+            return (path == other.path && format == other.format && flags == other.flags && mimap == other.mimap);
+        }
     };
     std::unordered_map<ImageId, ImageProperties> imagesProperties;
+
+    ImageId errorId{qTypes::NULL_IMAGE_ID};
 };

@@ -3,22 +3,21 @@
 #include <glm/vec4.hpp>
 
 #include <vulkan/vulkan.h>
-
+struct GPUImage;
 class GradientPipeline : public Pipeline
 {
   private:
     struct PushConstant
     {
-        glm::vec4 data1;
-        glm::vec4 data2;
-        glm::vec4 data3;
-        glm::vec4 data4;
+        std::uint32_t imageID;
     };
 
   public:
     virtual void init(GPUDevice &device);
     virtual void cleanUp(GPUDevice &device);
-    virtual void beginDraw(int frameIndex);
+    virtual void beginDraw(int frameIndex) {}
+
+    void draw(VkCommandBuffer cmd, GPUDevice &device, GPUImage &image);
 
   private:
     VkPipelineLayout gradientPipelineLayout;

@@ -17,6 +17,8 @@ cmake_policy(SET CMP0140 NEW)
 function(get_qkeg_common_2d_shaders outVar)
   set(QKEG_2D_SHADERS
 
+    fullScreenQuad.vert
+
     # fullscreen_triangle.vert
     # sprite.vert
     # sprite.frag
@@ -57,6 +59,7 @@ endfunction()
 
 function(get_qkeg_common_3d_shaders outVar)
   set(QKEG_3D_SHADERS
+    fullScreenQuad.vert
 
     # fullscreen_triangle.vert
     # skybox.frag
@@ -73,7 +76,7 @@ function(get_qkeg_common_3d_shaders outVar)
     # shadow_map_point.frag
     # imgui.vert
     # imgui.frag
-    gradient.comp
+    gradient.frag
   )
 
   get_target_property(QKEG_SOURCE_DIR qkeg SOURCE_DIR)

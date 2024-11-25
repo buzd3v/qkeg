@@ -25,3 +25,9 @@
 [submodule "qkeg/third_party/stb"]
 	path = qkeg/third_party/stb
 	url = https://github.com/gracicot/stb-cmake
+[submodule "qkeg/third_party/singleton"]
+	path = qkeg/third_party/singleton
+	url = https://github.com/jimmy-park/singleton
+[submodule "qkeg/third_party/fastgltf"]
+	path = qkeg/third_party/fastgltf
+	url = https://github.com/spnda/fastgltf

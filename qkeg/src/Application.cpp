@@ -54,6 +54,8 @@ void Application::init(const Params &ps)
 
     gpuDevice.init(window, params.appName.c_str(), Version(1, 1, 1));
     inputManager.init(window);
+
+    customInit();
 }
 void Application::run()
 {
@@ -119,9 +121,13 @@ void Application::run()
             }
         }
     }
+    {
+        gpuDevice.waitIdle();
+    }
 }
 
 void Application::cleanup()
 {
+    customCleanup();
     gpuDevice.cleanUp();
 }

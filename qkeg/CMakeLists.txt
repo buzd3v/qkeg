@@ -24,14 +24,26 @@ add_library(qkeg
   src/Graphics/Vulkan/VkInitializer.cpp
   src/Graphics/Vulkan/ImagePool.cpp
   src/Graphics/Vulkan/VkUtil.cpp
+  src/Graphics/Vulkan/VkDebugUtil.cpp
   src/Graphics/Vulkan/PipelineBuilder.cpp
-  src/Graphics/Vulkan/BindlessDescriptor.cpp
   src/Graphics/Vulkan/ImageStream.cpp
+  src/Graphics/Vulkan/BindlessDescriptor.cpp
+  src/Graphics/Vulkan/GPUBuffer.cpp
+  src/Graphics/Vulkan/VkExcutor.cpp
+
+  # mesh file
+  src/Graphics/Mesh/MeshPool.cpp
+  src/Graphics/Mesh/MaterialPool.cpp
 
   # pipeline files
   src/Graphics/Pipeline/GradientPipeline.cpp
+  src/Graphics/Pipeline/MeshPipeline.cpp
 
-  src/Graphics/GameRenderer.cpp
+  # renderer files
+  src/Graphics/Renderer/GameRenderer.cpp
+  src/Graphics/Renderer/Scene.cpp
+  src/Graphics/Renderer/Light.cpp
+  src/Graphics/Renderer/Skeleton.cpp
 )
 
 add_library(qkeg::qkeg ALIAS qkeg)
@@ -47,6 +59,8 @@ target_include_directories(qkeg
   PUBLIC
   "${CMAKE_CURRENT_LIST_DIR}/include"
   "${CMAKE_CURRENT_LIST_DIR}/include/Graphics"
+  "${CMAKE_CURRENT_LIST_DIR}/third_party"
+  "${CMAKE_CURRENT_LIST_DIR}/third_party/singleton/include"
 
   # "${CMAKE_CURRENT_LIST_DIR}/include"
   PRIVATE
@@ -64,6 +78,8 @@ target_link_libraries(qkeg
   GPUOpen::VulkanMemoryAllocator
   PRIVATE
   Vulkan::Vulkan
+  singleton::singleton-atomic
+  fastgltf::fastgltf
 )
 
 target_compile_definitions(qkeg PUBLIC VK_NO_PROTOTYPES VK_USE_PLATFORM_WIN32_KHR VMA_VULKAN_VERSION=1003000 NOMINMAX)
@@ -93,15 +109,15 @@ target_compile_definitions(qkeg PUBLIC VK_NO_PROTOTYPES VK_USE_PLATFORM_WIN32_KH
 # target_link_libraries(qkeg PRIVATE SDL2::SDL2main)
 # endif()
 
-# # glm
-# target_compile_definitions(qkeg
-# PUBLIC
-# GLM_FORCE_CTOR_INIT
-# GLM_FORCE_XYZW_ONLY
-# GLM_FORCE_EXPLICIT_CTOR
-# GLM_FORCE_DEPTH_ZERO_TO_ONE
-# GLM_ENABLE_EXPERIMENTAL
-# )
+# glm
+target_compile_definitions(qkeg
+  PUBLIC
+  GLM_FORCE_CTOR_INIT
+  GLM_FORCE_XYZW_ONLY
+  GLM_FORCE_EXPLICIT_CTOR
+  GLM_FORCE_DEPTH_ZERO_TO_ONE
+  GLM_ENABLE_EXPERIMENTAL
+)
 
 # target_compile_definitions(qkeg
 # PUBLIC

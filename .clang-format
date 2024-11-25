@@ -6,6 +6,6 @@ AlignConsecutiveDeclarations: "true"
 AlignTrailingComments: "true"
 BinPackArguments: "false"
 AlwaysBreakTemplateDeclarations: Yes
-AllowShortFunctionsOnASingleLine: Inline   
+AllowShortFunctionsOnASingleLine: Inline
 ---
 

@@ -22,7 +22,6 @@ class Swapchain
                 int height);
     void recreate(const vkb::PhysicalDevice &physDevice, const vkb::Device &device, VkSurfaceKHR &surface, int width,
                   int height);
-
     void beginFrame(VkDevice device, std::uint32_t frameIndex);
     void resetFence(VkDevice device, std::uint32_t frameIndex);
     void initSyncStructures(const VkDevice &device);

@@ -1,21 +1,28 @@
 #pragma once
 
-struct RawImageProps
+#include "GPUDevice.h"
+#include <filesystem>
+#include <stb/stb_image.h>
+#include <vulkan/vulkan.h>
+
+struct GPUImage;
+
+struct RawImage
 {
-    RawImageProps() = default;
-    ~RawImageProps();
+    RawImage() = default;
+    ~RawImage();
 
     // move
-    RawImageProps(RawImageProps &&props);
-    RawImageProps &operator=(RawImageProps &&props);
+    RawImage(RawImage &&props);
+    RawImage &operator=(RawImage &&props);
 
     // not allow copy operation
-    RawImageProps(RawImageProps &props)            = delete;
-    RawImageProps &operator=(RawImageProps &props) = delete;
+    RawImage(RawImage &props)            = delete;
+    RawImage &operator=(RawImage &props) = delete;
 
     unsigned char *pixels{nullptr};
     int            width{0};
-    int            heigh{0};
+    int            height{0};
     int            channels{0};
 
     bool shouldFreeData{false};
@@ -23,4 +30,15 @@ struct RawImageProps
 
 class ImageStream
 {
+  private:
+    GPUDevice             &device;
+    void                   uploadDataToGPUImage(const GPUImage &image, void *pixels, uint32_t layers = 0);
+    int                    getChannels(VkFormat imgFormat);
+
+  public:
+    ImageStream(GPUDevice &device) : device(device) {}
+    [[nodiscard]] RawImage loadRawImage(const std::filesystem::path &path);
+    [[nodiscard]] GPUImage loadGPUImage(RawImage rawImage, VkFormat format, VkImageUsageFlags flags, bool mipmap);
+    [[nodiscard]] GPUImage createGPUImage(GPUImageCreateInfo                     createInfo,
+                                          std::optional<VmaAllocationCreateInfo> customAllocInfo = std::nullopt);
 };

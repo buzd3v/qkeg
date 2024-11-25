@@ -7,6 +7,9 @@ add_subdirectory(glfw)
 # stb
 # add_subdirectory(stb)
 
+# singleton
+add_subdirectory(singleton)
+
 # # SDL
 # if (NOT BUILD_SHARED_LIBS)
 # set(SDL_SHARED_ENABLED_BY_DEFAULT OFF CACHE BOOL "Don't build SDL as shared lib")
@@ -33,6 +36,9 @@ add_subdirectory(vma)
 
 # volk
 add_subdirectory(volk)
+
+# fastgltf
+add_subdirectory(fastgltf)
 
 # ## Dear ImGui
 # set(IMGUI_SOURCES
@@ -133,6 +139,11 @@ add_subdirectory(json)
 add_subdirectory(fmt)
 set_target_properties(fmt PROPERTIES
     PUBLIC_HEADER ""
+)
+target_compile_options(fmt PRIVATE
+    $<$<CXX_COMPILER_ID:GNU>:-w>
+    $<$<CXX_COMPILER_ID:Clang>:-w>
+    $<$<CXX_COMPILER_ID:MSVC>:/w>
 )
 
 if(MSVC)
