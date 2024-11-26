@@ -30,6 +30,7 @@ add_library(qkeg
   src/Graphics/Vulkan/BindlessDescriptor.cpp
   src/Graphics/Vulkan/GPUBuffer.cpp
   src/Graphics/Vulkan/VkExcutor.cpp
+  src/Graphics/GLTFLoader/GLTFLoader.cpp
 
   # mesh file
   src/Graphics/Mesh/MeshPool.cpp

@@ -54,7 +54,7 @@ qTypes::MaterialId MaterialPool::addMaterial(GPUDevice &device, GPUMaterial &mat
 
 qTypes::MaterialId MaterialPool::requestFreeId()
 {
-    return materials.size();
+    return (qTypes::MaterialId)materials.size();
 }
 
 qTypes::MaterialId MaterialPool::getPlaceholder()

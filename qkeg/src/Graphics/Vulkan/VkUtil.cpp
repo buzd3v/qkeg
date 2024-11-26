@@ -219,7 +219,6 @@ RenderInfo createRenderingInfo(const RenderingCreateInfo &info)
     RenderInfo ri{};
     assert((info.colorImageView || info.depthImageView != nullptr) && "Either draw or depth image should be present");
 
-    VkRenderingAttachmentInfo colorAttach, depthAttach;
     if (info.colorImageView)
     {
         ri.colorAttachment = VkRenderingAttachmentInfo{
