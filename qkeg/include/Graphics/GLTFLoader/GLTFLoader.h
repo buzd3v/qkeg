@@ -1,7 +1,7 @@
 #pragma once
 #include <filesystem>
 
-class Scene;
+struct Scene;
 class GPUDevice;
 
 namespace glTFUtil
