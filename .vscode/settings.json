@@ -97,7 +97,9 @@
         "xlocmes": "cpp",
         "xloctime": "cpp",
         "xtr1common": "cpp",
-        "latch": "cpp"
+        "latch": "cpp",
+        "memory_resource": "cpp",
+        "stdfloat": "cpp"
     },
     "c-cpp-flylint.cppcheck.standard": [
         "c++20",

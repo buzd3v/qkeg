@@ -2,10 +2,10 @@
 
 #include "GPUMaterial.h"
 #include "Vulkan/GPUBuffer.h"
-
+#include "singleton_atomic.hpp"
 class GPUDevice;
 
-class MaterialPool
+class MaterialPool : public SingletonAtomic<MaterialPool>
 {
   public:
     void init(GPUDevice &device);

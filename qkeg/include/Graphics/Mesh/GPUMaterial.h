@@ -12,4 +12,6 @@ struct GPUMaterial
     ImageId normalMapTexture{qTypes::NULL_IMAGE_ID};
     ImageId metallicRoughnessTexture{qTypes::NULL_IMAGE_ID};
     ImageId emissiveTexture{qTypes::NULL_IMAGE_ID};
+
+    std::string name{""};
 };

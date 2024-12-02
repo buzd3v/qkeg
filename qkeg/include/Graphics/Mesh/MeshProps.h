@@ -16,7 +16,7 @@ struct MeshProps
         float     uv_x;
         glm::vec3 normal;
         float     uv_y;
-        glm::vec3 tangent;
+        glm::vec4 tangent;
     };
 
     std::vector<Vertex> vertices;
