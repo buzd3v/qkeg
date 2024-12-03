@@ -310,6 +310,33 @@ MeshProps loadPrimitives(const fastgltf::Asset &asset, const std::string name, c
     return props;
 }
 
+LightType chooseLightType(const fastgltf::LightType type)
+{
+    switch (type)
+    {
+    case fastgltf::LightType::Point:
+        return LightType::Point;
+        break;
+    case fastgltf::LightType::Directional:
+        return LightType::Directional;
+        break;
+    case fastgltf::LightType::Spot:
+        return LightType::Spot;
+        break;
+    default:
+        break;
+    }
+    return LightType::None;
+}
+
+Light loadLight(const fastgltf::Light &gltfLight)
+{
+    Light light{
+        .name = gltfLight.name.c_str(),
+        .type = chooseLightType(gltfLight.type),
+    };
+}
+
 Scene glTFUtil::loadGltfFile(std::filesystem::path path, GPUDevice &device)
 {
 

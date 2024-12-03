@@ -21,6 +21,7 @@ inline constexpr int TYPE_LIGHT_SPOT        = 2;
 
 struct Light
 {
+    std::string         name{};
     LightType           type{LightType::None};
     qColor::LinearColor color;
     float               intensity{0.f};
