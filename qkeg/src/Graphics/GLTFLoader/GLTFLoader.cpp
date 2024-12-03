@@ -1,10 +1,22 @@
 #include <fastgltf/core.hpp>
+#include <fastgltf/glm_element_traits.hpp>
 #include <fastgltf/tools.hpp>
 
 #include "Common.h"
 #include "GLTFLoader/GLTFLoader.h"
 #include "GPUDevice.h"
 #include "Renderer/Scene.h"
+
+template <>
+struct fastgltf::ElementTraits<std::array<uint8_t, 4>>
+    : fastgltf::ElementTraitsBase<std::array<uint8_t, 4>, AccessorType::Vec4, uint8_t>
+{
+};
+template <>
+struct fastgltf::ElementTraits<std::array<float, 4>>
+    : fastgltf::ElementTraitsBase<std::array<float, 4>, AccessorType::Vec4, float>
+{
+};
 
 namespace qConstant
 {
@@ -110,7 +122,7 @@ fastgltf::Asset loadglTF(const std::filesystem::path &path)
     auto             data = fastgltf::GltfDataBuffer::FromPath(path);
     if (data.error() != fastgltf::Error::None)
     {
-        throw(std::runtime_error(fmt::format("Cannot load file: {}", path.c_str())));
+        throw(std::runtime_error(fmt::format("Cannot load file: {}", path.string())));
     }
     return std::move(parser.loadGltf(data.get(), path.parent_path(), fastgltf::Options::None).get());
 }
@@ -209,8 +221,8 @@ MeshProps loadPrimitives(const fastgltf::Asset &asset, const std::string name, c
     {
 
         auto &indicesAcessor = asset.accessors[primitive.indicesAccessor.value()];
-        auto  indices        = getPackedBuffer<uint16_t>(asset, indicesAcessor);
-        props.indices.assign(indices.begin(), indices.end());
+        auto  indices        = getPackedBuffer<uint32_t>(asset, indicesAcessor);
+        // props.indices.assign(indices.begin(), indices.end());
     }
 
     { // load positions
@@ -280,8 +292,10 @@ MeshProps loadPrimitives(const fastgltf::Asset &asset, const std::string name, c
     { // load joints and weight //for skinning
         if (auto jointsAccessor = findAccessor(primitive, qConstant::GLTF_JOINTS_ACCESSOR) != -1)
         {
-            const auto joints  = getPackedBuffer<std::uint8_t[4]>(asset, primitive, qConstant::GLTF_JOINTS_ACCESSOR);
-            const auto weights = getPackedBuffer<float[4]>(asset, primitive, qConstant::GLTF_WEIGHTS_ACCESSOR);
+            const auto joints =
+                getPackedBuffer<std::array<uint8_t, 4>>(asset, primitive, qConstant::GLTF_JOINTS_ACCESSOR);
+            const auto weights =
+                getPackedBuffer<std::array<float, 4>>(asset, primitive, qConstant::GLTF_WEIGHTS_ACCESSOR);
 
             assert(joints.size() == numVertices && "Numbers of joints and vertices are not match");
             assert(weights.size() == numVertices && "Numbers of wieghts and vertices are not match");
@@ -350,7 +364,7 @@ Scene glTFUtil::loadGltfFile(std::filesystem::path path, GPUDevice &device)
 
                 scene.meshProps.emplace(meshID, std::move(meshProps));
             }
-            scene.
+            scene.models.push_back(std::move(model));
         }
     }
 
