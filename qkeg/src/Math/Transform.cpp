@@ -15,6 +15,8 @@ Transform::Transform(const glm::mat4 &model)
     position = translationVec;
     scale    = scaleVec;
     rotation = rotationQuat;
+
+    isInit = true;
 }
 
 void Transform::translate(const glm::vec3 &offset)
@@ -47,19 +49,19 @@ Transform Transform::operator*(const Transform &other) const
     return Transform(getTransformMatrix() * other.getTransformMatrix());
 }
 
-void Transform::setPosition(const glm::vec3 &pos)
+void Transform::setPosition(const glm::vec3 pos)
 {
     position = pos;
     isInit   = false;
 }
 
-void Transform::setRotation(const glm::quat &rot)
+void Transform::setRotation(const glm::quat rot)
 {
     this->rotation = glm::normalize(rot);
     isInit         = false;
 }
 
-void Transform::setScale(const glm::vec3 &scl)
+void Transform::setScale(const glm::vec3 scl)
 {
     scale  = scl;
     isInit = false;
@@ -100,9 +102,11 @@ glm::vec3 Transform::up()
 }
 glm::vec3 Transform::right()
 {
-    return rotation * qConstant::AXES_FRONT;
+	//kien.nx fix wrong typing error begin
+    return rotation * qConstant::AXES_RIGHT;
 }
 glm::vec3 Transform::front()
 {
-    return rotation * qConstant::AXES_RIGHT;
+    return rotation * qConstant::AXES_FRONT;
+	//kien.nx fix wrong typing error end
 }
