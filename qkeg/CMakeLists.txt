@@ -44,6 +44,7 @@ add_library(qkeg
   src/Graphics/Renderer/GameRenderer.cpp
   src/Graphics/Renderer/Scene.cpp
   src/Graphics/Renderer/Light.cpp
+  src/Graphics/Renderer/ScenePool.cpp
   src/Graphics/Renderer/Skeleton.cpp
 
   # math files
