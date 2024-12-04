@@ -45,6 +45,9 @@ add_library(qkeg
   src/Graphics/Renderer/Scene.cpp
   src/Graphics/Renderer/Light.cpp
   src/Graphics/Renderer/Skeleton.cpp
+
+  # math files
+  src/Math/Transform.cpp
 )
 
 add_library(qkeg::qkeg ALIAS qkeg)

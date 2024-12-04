@@ -7,6 +7,8 @@
 #include "GPUDevice.h"
 #include "Renderer/Scene.h"
 
+#include <glm/gtc/type_ptr.hpp>
+
 template <>
 struct fastgltf::ElementTraits<std::array<uint8_t, 4>>
     : fastgltf::ElementTraitsBase<std::array<uint8_t, 4>, AccessorType::Vec4, uint8_t>
@@ -174,7 +176,7 @@ int findAccessor(const fastgltf::Primitive &primitive, const std::string &attrbN
     {
         if (std::string(accessorName.c_str()) == attrbName)
         {
-            return accessorID;
+            return (int)accessorID;
         }
     }
     return -1;
@@ -329,12 +331,83 @@ LightType chooseLightType(const fastgltf::LightType type)
     return LightType::None;
 }
 
+qColor::LinearColor vec2Color(glm::vec3 color)
+{
+    return qColor::LinearColor{
+        .red   = (float)color[0],
+        .green = (float)color[1],
+        .blue  = (float)color[2],
+        .alpha = 1.f,
+    };
+}
+
+float getIntensity(float inten)
+{
+    const auto PBR_WATTS_TO_LUMENS = 683.f;
+    return inten / PBR_WATTS_TO_LUMENS;
+}
+
 Light loadLight(const fastgltf::Light &gltfLight)
 {
     Light light{
-        .name = gltfLight.name.c_str(),
-        .type = chooseLightType(gltfLight.type),
+        .name      = gltfLight.name.c_str(),
+        .type      = chooseLightType(gltfLight.type),
+        .color     = vec2Color(glm::make_vec3(gltfLight.color.data())),
+        .intensity = getIntensity(gltfLight.intensity),
+        .range     = (float)gltfLight.range.value(),
     };
+    light.setConeAngle(gltfLight.innerConeAngle.value(), gltfLight.outerConeAngle.value());
+    return light;
+}
+
+Transform gl2Transform(const fastgltf::Node &glNode)
+{
+    Transform t;
+    std::visit(fastgltf::visitor{
+                   [&](fastgltf::TRS transform) {
+                       glm::vec3 tl(transform.translation[0], transform.translation[1], transform.translation[2]);
+                       glm::quat rot(
+                           transform.rotation[3], transform.rotation[0], transform.rotation[1], transform.rotation[2]);
+                       glm::vec3 sc(transform.scale[0], transform.scale[1], transform.scale[2]);
+
+                       glm::mat4 tm = glm::translate(glm::mat4(1.f), tl);
+                       glm::mat4 rm = glm::toMat4(rot);
+                       glm::mat4 sm = glm::scale(glm::mat4(1.f), sc);
+
+                       t.setPosition(tl);
+                       t.setRotation(rot);
+                       t.setScale(sc);
+
+                       glm::mat4 result = tm * rm * sm;
+                       return result;
+                   },
+                   [&](fastgltf::math::fmat4x4 matrix) {
+                       glm::mat4 glmMatrix;
+                       // TODO: Implement conversion from fmat4x4 to glm::mat4
+                       glmMatrix = glm::make_mat4(&matrix[0][0]); // Assuming fmat4x4 is a 4x4 float array.
+                       t         = Transform(glmMatrix);
+                       return glmMatrix;
+                   },
+               },
+               glNode.transform);
+}
+
+void loadNode(const fastgltf::Asset &asset, const fastgltf::Node &node, SceneNode &sceneNode)
+{
+    sceneNode.name        = node.name.c_str();
+    sceneNode.meshIndex   = node.meshIndex.value();
+    sceneNode.lightIndex  = node.lightIndex.value();
+    sceneNode.cameraIndex = node.cameraIndex.value();
+    sceneNode.transform   = gl2Transform(node);
+
+    sceneNode.children.resize(node.children.size());
+    for (auto i = 0; i < node.children.size(); i++)
+    {
+        const auto &childNode = asset.nodes[node.children[i]];
+        auto       &childPtr  = sceneNode.children[i];
+        childPtr              = std::make_unique<SceneNode>();
+        loadNode(asset, childNode, *childPtr);
+    }
 }
 
 Scene glTFUtil::loadGltfFile(std::filesystem::path path, GPUDevice &device)
@@ -392,6 +465,45 @@ Scene glTFUtil::loadGltfFile(std::filesystem::path path, GPUDevice &device)
                 scene.meshProps.emplace(meshID, std::move(meshProps));
             }
             scene.models.push_back(std::move(model));
+        }
+    }
+
+    { // load light
+        scene.lights.reserve(asset.lights.size());
+        for (const auto &light : asset.lights)
+        {
+            scene.lights.push_back(loadLight(light));
+        }
+    }
+
+    { // load nodes
+        scene.nodes.resize(mainScene.nodeIndices.size());
+        for (auto i = 0; i < mainScene.nodeIndices.size(); i++)
+        {
+            const auto &glNode = asset.nodes.at(mainScene.nodeIndices.at(i));
+            // don't know but it works somehow
+            if (glNode.children.size() == 2)
+            {
+                const auto &node1 = asset.nodes[glNode.children.at(0)];
+                const auto &node2 = asset.nodes[glNode.children.at(1)];
+
+                if ((node1.meshIndex.has_value() && node1.skinIndex.has_value()) ||
+                    (node2.meshIndex.has_value() && node2.skinIndex.has_value()))
+                {
+                    const auto &meshNode = node1.meshIndex.has_value() ? node1 : node2;
+                    auto       &nodePtr  = scene.nodes[i];
+                    nodePtr              = std::make_unique<SceneNode>();
+                    loadNode(asset, meshNode, *nodePtr);
+
+                    const auto parentTransform = gl2Transform(glNode);
+                    nodePtr->transform         = parentTransform * nodePtr->transform;
+                    continue;
+                }
+            }
+
+            auto &nodePtr = scene.nodes[i];
+            nodePtr       = std::make_unique<SceneNode>();
+            loadNode(asset, glNode, *nodePtr);
         }
     }
 

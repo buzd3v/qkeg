@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Light.h"
+#include "Math/Transform.h"
 #include "Mesh/MaterialPool.h"
 #include "Mesh/MeshPool.h"
 #include "Skeleton.h"
@@ -13,10 +14,12 @@ struct ModelPool
 
 struct SceneNode
 {
-    int meshIndex{-1};
-    int materialIndex{-1};
-    int lightIndex{-1};
-    int cameraIndex{-1};
+    std::string name{};
+    int         meshIndex{-1};
+    int         materialIndex{-1};
+    int         lightIndex{-1};
+    int         cameraIndex{-1};
+    Transform   transform;
 
     SceneNode                              *parent;
     std::vector<std::unique_ptr<SceneNode>> children;

@@ -27,6 +27,16 @@ struct Light
     float               intensity{0.f};
     float               range{0.f};
     glm::vec2           scaleOffset; // for spot light;
+    bool                shadow{true};
+
+    void setConeAngle(float innerCone, float outerCone)
+    {
+        // Reference:
+        // https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Khronos/KHR_lights_punctual/README.md
+        float lightAngleScale  = 1.0f / std::max(0.001f, cos(innerCone) - cos(outerCone));
+        float lightAngleOffset = -cos(innerCone) * lightAngleScale;
+        this->scaleOffset      = glm::vec2{lightAngleScale, lightAngleOffset};
+    }
 };
 
 // matching light.glsl
