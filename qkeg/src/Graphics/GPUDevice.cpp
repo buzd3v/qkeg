@@ -139,10 +139,6 @@ void GPUDevice::initVulkan(GLFWwindow *window, const char *appName, const Versio
 }
 void GPUDevice::initSingletonComponent()
 {
-    { // construct ImagePool -> for image management
-        ImagePool::Construct(*this);
-    }
-
     { // construct an immediately excutor, command once used by this class will be
         // excutte immediately
         VkExcutor::Construct();
@@ -152,6 +148,10 @@ void GPUDevice::initSingletonComponent()
     { // construct BindlessDescriptor
         BindlessDescriptor::Construct();
         BindlessDescriptor::GetInstance()->init(device, maxAnisotropy);
+    }
+
+    { // construct ImagePool -> for image management
+        ImagePool::Construct(*this);
     }
 }
 void GPUDevice::queryDeviceCapabilities()

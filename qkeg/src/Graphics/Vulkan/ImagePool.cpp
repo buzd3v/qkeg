@@ -2,7 +2,18 @@
 #include "Graphics/Vulkan/ImagePool.h"
 #include "Vulkan/ImageStream.h"
 
-ImagePool::ImagePool(GPUDevice &device) : device(device) {}
+ImagePool::ImagePool(GPUDevice &device) : device(device)
+{
+    { // create white texture
+        std::uint32_t      pixel      = 0xFFFFFFFF;
+        GPUImageCreateInfo createInfo = {
+            .format     = VK_FORMAT_R8G8B8A8_UNORM,
+            .usageFlags = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT,
+            .extent     = VkExtent3D{1, 1, 1},
+        };
+        whiteTextureId = createImage(createInfo, &pixel, whiteTextureId);
+    }
+}
 
 ImageId ImagePool::loadImageFromFile(std::filesystem::path &path, VkFormat format, VkImageUsageFlags flags, bool mipMap)
 {
@@ -57,17 +68,22 @@ const GPUImage &ImagePool::getImage(ImageId id) const
     return images.at(id);
 }
 
-ImageId ImagePool::createImage(GPUImageCreateInfo &info, ImageId id)
+ImageId ImagePool::createImage(GPUImageCreateInfo &info, void *pixelData, ImageId id)
 {
     ImageStream is(device);
     if (id == qTypes::NULL_IMAGE_ID)
     {
         id = requestImageId();
     }
-    auto image = is.createGPUImage(info);
 
+    auto image = is.createGPUImage(info);
+    if (pixelData)
+    {
+        is.uploadDataToGPUImage(image, pixelData);
+    }
     return addImage(std::move(image), id);
 }
+
 [[nodiscard]] ImageId ImagePool::requestImageId() const
 {
     return (ImageId)images.size();

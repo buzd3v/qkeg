@@ -6,6 +6,7 @@
 #include "Vulkan/GPUImage.h"
 
 class MeshPool;
+class MaterialPool;
 class GPUDevice;
 
 class GameRenderer : public SingletonAtomic<GameRenderer>
@@ -36,4 +37,7 @@ class GameRenderer : public SingletonAtomic<GameRenderer>
     VkFormat depthImageFormat{VK_FORMAT_D32_SFLOAT};
 
     VkSampleCountFlagBits sampleCounts{VK_SAMPLE_COUNT_1_BIT};
+
+    MeshPool     *meshPool;
+    MaterialPool *materialPool;
 };

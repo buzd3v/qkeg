@@ -12,6 +12,8 @@ inline constexpr glm::vec3 AXES_LEFT{1.f, 0.f, 0.f};
 inline constexpr glm::vec3 AXES_RIGHT{-1.f, 0.f, 0.f};
 inline constexpr glm::vec3 AXES_FRONT{0.f, 0.f, 1.f};
 inline constexpr glm::vec3 AXES_BACK{0.f, 0.f, -1.f};
+inline constexpr glm::mat4 IDENTITY_MAT{1.f};
+
 } // namespace qConstant
 // global axes
 /*
@@ -41,30 +43,24 @@ class Transform
     bool      operator==(const Transform &other) const;
     Transform operator*(const Transform &other) const;
     Transform inverse();
-    Transform getTransformMat();
 
     // Getters and Setters
     glm::vec3 getPosition() const { return position; }
     glm::quat getRotation() const { return rotation; }
     glm::vec3 getScale() const { return scale; }
 
-    void setPosition(const glm::vec3 &pos) { position = pos; }
-    void setRotation(const glm::quat &rot) { rotation = rot; }
-    void setScale(const glm::vec3 &scl) { scale = scl; }
+    void setPosition(const glm::vec3 &pos);
+    void setRotation(const glm::quat &rot);
+    void setScale(const glm::vec3 &scl);
 
     // Combine transformations into a single matrix
-    glm::mat4 getTransformMatrix() const
-    {
-        glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), position);
-        glm::mat4 rotationMatrix    = glm::toMat4(rotation);
-        glm::mat4 scaleMatrix       = glm::scale(glm::mat4(1.0f), scale);
-        return translationMatrix * rotationMatrix * scaleMatrix;
-    }
+    glm::mat4 getTransformMatrix() const;
 
     // Helper functions to manipulate the transform
-    void translate(const glm::vec3 &offset) { position += offset; }
-    void rotate(const glm::vec3 &axis, float angle) { rotation = glm::rotate(rotation, glm::radians(angle), axis); }
-    void scaleBy(const glm::vec3 &factor) { scale *= factor; }
+    void translate(const glm::vec3 &offset);
+    void rotate(const glm::vec3 &axis, float angle);
+    void scaleBy(const glm::vec3 &factor);
+    bool isIdentity() const;
 
   private:
     glm::vec3 position;
@@ -72,4 +68,5 @@ class Transform
     glm::quat rotation;
 
     mutable glm::mat4 transformMat;
+    mutable bool      isInit{false};
 };

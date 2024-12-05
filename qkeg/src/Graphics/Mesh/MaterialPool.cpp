@@ -31,10 +31,10 @@ qTypes::MaterialId MaterialPool::addMaterial(GPUDevice &device, GPUMaterial &mat
     const auto chooseTexture = [](ImageId imgId, ImageId placeHolder) {
         return imgId != qTypes::NULL_IMAGE_ID ? imgId : placeHolder;
     };
+    auto           imgPool = ImagePool::GetInstance();
+    MaterialProps *props   = (MaterialProps *)materialBuffer.info.pMappedData;
 
-    MaterialProps *props = (MaterialProps *)materialBuffer.info.pMappedData;
-
-    auto whiteTextureId = qTypes::NULL_IMAGE_ID;
+    auto whiteTextureId = imgPool->getWhiteTextureID();
     auto id             = requestFreeId();
 
     assert(id < MAX_MATERIALS);

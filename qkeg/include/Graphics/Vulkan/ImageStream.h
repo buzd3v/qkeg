@@ -31,11 +31,11 @@ struct RawImage
 class ImageStream
 {
   private:
-    GPUDevice             &device;
-    void                   uploadDataToGPUImage(const GPUImage &image, void *pixels, uint32_t layers = 0);
-    int                    getChannels(VkFormat imgFormat);
+    GPUDevice &device;
+    int        getChannels(VkFormat imgFormat);
 
   public:
+    void uploadDataToGPUImage(const GPUImage &image, void *pixels, uint32_t layers = 0);
     ImageStream(GPUDevice &device) : device(device) {}
     [[nodiscard]] RawImage loadRawImage(const std::filesystem::path &path);
     [[nodiscard]] GPUImage loadGPUImage(RawImage rawImage, VkFormat format, VkImageUsageFlags flags, bool mipmap);

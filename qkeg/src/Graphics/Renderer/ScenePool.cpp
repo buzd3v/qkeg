@@ -6,7 +6,7 @@ ScenePool::ScenePool(GPUDevice &device) : device(device)
     // TODO: insert constructor here
 }
 
-const Scene &ScenePool::addScene(const std::string &path, Scene scene)
+const Scene &ScenePool::addScene(const std::string &path, Scene &scene)
 {
     scene.path               = path;
     auto [it, insertedScene] = scenes.emplace(path, std::move(scene));
@@ -22,7 +22,7 @@ const Scene &ScenePool::getScene(const std::string &path) const
     }
     else
     {
-        throw std::runtime_error(fmt::format("Scene {} was not loaded!"));
+        throw std::runtime_error(fmt::format("Scene {} was not loaded!", path));
     }
 }
 

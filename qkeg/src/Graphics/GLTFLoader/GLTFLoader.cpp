@@ -390,14 +390,16 @@ Transform gl2Transform(const fastgltf::Node &glNode)
                    },
                },
                glNode.transform);
+
+    return t;
 }
 
 void loadNode(const fastgltf::Asset &asset, const fastgltf::Node &node, SceneNode &sceneNode)
 {
     sceneNode.name        = node.name.c_str();
-    sceneNode.meshIndex   = node.meshIndex.value();
-    sceneNode.lightIndex  = node.lightIndex.value();
-    sceneNode.cameraIndex = node.cameraIndex.value();
+    sceneNode.meshIndex   = (int)node.meshIndex.value();
+    sceneNode.lightIndex  = (int)node.lightIndex.value();
+    sceneNode.cameraIndex = (int)node.cameraIndex.value();
     sceneNode.transform   = gl2Transform(node);
 
     sceneNode.children.resize(node.children.size());

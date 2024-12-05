@@ -1,17 +1,28 @@
 #include "Renderer/GameRenderer.h"
 #include "GPUDevice.h"
+#include "Mesh/MaterialPool.h"
 #include "Vulkan/ImagePool.h"
 #include "Vulkan/VkUtil.h"
 void GameRenderer::init(GPUDevice &device, const glm::ivec2 &drawImageSize)
 {
     sampleCounts = device.getMaxSupportSampleCounts();
     createDrawImage(device, drawImageSize, false);
+
+    // Query for pool
+    meshPool     = MeshPool::GetInstance();
+    materialPool = MaterialPool::GetInstance();
+
+    // Pipeline creation
     meshPipeline.init(device, drawImageFormat, depthImageFormat, sampleCounts);
 }
 
 void GameRenderer::draw(GPUDevice &device, VkCommandBuffer cmd) {}
 
-void GameRenderer::cleanUp(GPUDevice &device) {}
+void GameRenderer::cleanUp(GPUDevice &device)
+{
+    meshPool     = nullptr;
+    materialPool = nullptr;
+}
 
 void GameRenderer::createDrawImage(GPUDevice &device, glm::ivec2 renderSize, bool haveCreated)
 {
@@ -31,7 +42,7 @@ void GameRenderer::createDrawImage(GPUDevice &device, glm::ivec2 renderSize, boo
             .samples    = sampleCounts,
         };
 
-        drawImageId = pool->createImage(imageInfo, drawImageId);
+        drawImageId = pool->createImage(imageInfo, nullptr, drawImageId);
         if (!haveCreated)
         {
             imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -60,7 +71,7 @@ void GameRenderer::createDrawImage(GPUDevice &device, glm::ivec2 renderSize, boo
             .extent     = extent,
             .samples    = sampleCounts,
         };
-        depthImageId = pool->createImage(depthInfo, depthImageId);
+        depthImageId = pool->createImage(depthInfo, nullptr, depthImageId);
         if (!haveCreated)
         {
             depthInfo.samples   = VK_SAMPLE_COUNT_1_BIT;

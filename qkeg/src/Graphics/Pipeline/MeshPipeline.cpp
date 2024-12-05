@@ -37,7 +37,8 @@ void MeshPipeline::init(GPUDevice &device, VkFormat colorImageFormat, VkFormat d
     vkDestroyShaderModule(device.getDevice(), fragmentShader, nullptr);
 }
 
-void MeshPipeline::draw(VkCommandBuffer cmd, GPUDevice &device, VkExtent2D renderView, std::span<MeshId> meshList)
+void MeshPipeline::draw(VkCommandBuffer cmd, GPUDevice &device, VkExtent2D renderView, std::span<MeshId> meshList,
+                        std::span<MeshDrawProps> &drawProps)
 {
     auto bindlessSet = BindlessDescriptor::GetInstance();
     auto meshPool    = MeshPool::GetInstance();
@@ -60,13 +61,17 @@ void MeshPipeline::draw(VkCommandBuffer cmd, GPUDevice &device, VkExtent2D rende
     };
     vkCmdSetScissor(cmd, 0, 1, &scissor);
 
-    for (auto meshId : meshList)
+    for (auto drawProp : drawProps)
     {
-        auto mesh = meshPool->getMesh(meshId);
+        // Draw mesh
+        auto mesh = meshPool->getMesh(drawProp.meshID);
         vkCmdBindIndexBuffer(cmd, mesh.indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT32);
 
+        // Submit push constants
         const auto pushConstant = PushConstant{
             .vertexBufferAddress = mesh.vertexBuffer.address,
+            .transform           = drawProp.transform,
+            .materialId          = drawProp.materialID,
         };
 
         vkCmdPushConstants(cmd,
@@ -77,4 +82,10 @@ void MeshPipeline::draw(VkCommandBuffer cmd, GPUDevice &device, VkExtent2D rende
                            &pushConstant);
         vkCmdDrawIndexed(cmd, mesh.numIndices, 1, 0, 0, 0);
     }
+}
+
+void MeshPipeline::cleanUp(VkDevice device)
+{
+    vkDestroyPipelineLayout(device, meshPipelineLayout, nullptr);
+    vkDestroyPipeline(device, meshPipeline, nullptr);
 }

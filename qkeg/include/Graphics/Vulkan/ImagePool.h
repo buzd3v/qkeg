@@ -19,10 +19,12 @@ class ImagePool : public SingletonAtomic<ImagePool>
     const GPUImage &getImage(ImageId id) const;
 
     // a drawable null image
-    [[nodiscard]] ImageId createImage(GPUImageCreateInfo &info, ImageId id = qTypes::NULL_IMAGE_ID);
+    [[nodiscard]] ImageId createImage(GPUImageCreateInfo &info, void *pixelData = nullptr,
+                                      ImageId id = qTypes::NULL_IMAGE_ID);
 
     // request for a new ImageId
     [[nodiscard]] ImageId requestImageId() const;
+    [[nodiscard]] ImageId getWhiteTextureID() { return whiteTextureId; }
 
     // destroy all image
     void destroyAll();
@@ -49,4 +51,5 @@ class ImagePool : public SingletonAtomic<ImagePool>
     std::unordered_map<ImageId, ImageProperties> imagesProperties;
 
     ImageId errorId{qTypes::NULL_IMAGE_ID};
+    ImageId whiteTextureId{qTypes::NULL_IMAGE_ID};
 };
