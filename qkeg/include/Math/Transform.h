@@ -62,6 +62,10 @@ class Transform
     void scaleBy(const glm::vec3 &factor);
     bool isIdentity() const;
 
+    glm::vec3 up();
+    glm::vec3 right();
+    glm::vec3 front();
+
   private:
     glm::vec3 position;
     glm::vec3 scale;

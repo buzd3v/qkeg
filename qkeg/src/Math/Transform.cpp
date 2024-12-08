@@ -93,3 +93,16 @@ bool Transform::isIdentity() const
 {
     return getTransformMatrix() == qConstant::IDENTITY_MAT;
 }
+
+glm::vec3 Transform::up()
+{
+    return rotation * qConstant::AXES_UP;
+}
+glm::vec3 Transform::right()
+{
+    return rotation * qConstant::AXES_FRONT;
+}
+glm::vec3 Transform::front()
+{
+    return rotation * qConstant::AXES_RIGHT;
+}
