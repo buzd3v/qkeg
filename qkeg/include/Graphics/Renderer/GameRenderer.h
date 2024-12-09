@@ -8,12 +8,21 @@
 class MeshPool;
 class MaterialPool;
 class GPUDevice;
+class Camera;
 
 class GameRenderer : public SingletonAtomic<GameRenderer>
 {
   public:
+    struct SceneProps
+    {
+        const Camera       &camera;
+        qColor::LinearColor ambientColor;
+        float               ambientIntensity;
+    };
+
+  public:
     void init(GPUDevice &device, const glm::ivec2 &drawImageSize);
-    void draw(GPUDevice &device, VkCommandBuffer cmd);
+    void draw(GPUDevice &device, VkCommandBuffer cmd, const Camera &camera, const SceneProps &props);
     void cleanUp(GPUDevice &device);
 
   public:
