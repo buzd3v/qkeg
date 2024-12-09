@@ -37,4 +37,13 @@ struct LinearColor
         };
     }
 };
+
+struct Color
+{
+    float red{0.f};
+    float green{0.f};
+    float blue{0.f};
+    Color(LinearColor color) : red(color.red), green(color.green), blue(color.blue) {}
+};
+
 }; // namespace qColor

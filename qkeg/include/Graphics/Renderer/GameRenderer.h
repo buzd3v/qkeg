@@ -2,6 +2,7 @@
 #include <glm/glm.hpp>
 #include <singleton_atomic.hpp>
 
+#include "Buffers.h";
 #include "Pipeline/MeshPipeline.h"
 #include "Vulkan/GPUImage.h"
 
@@ -15,9 +16,25 @@ class GameRenderer : public SingletonAtomic<GameRenderer>
   public:
     struct SceneProps
     {
-        const Camera       &camera;
+        Camera             &camera;
         qColor::LinearColor ambientColor;
         float               ambientIntensity;
+    };
+
+    // send this data to gpu
+    struct SceneData
+    {
+        // camera data
+        glm::mat4 view;
+        glm::mat4 projection;
+        glm::mat4 viewProjection;
+        glm::vec4 cameraPos;
+
+        // ambient
+        qColor::Color ambientColor;
+        float         ambientIntensity;
+
+        VkDeviceAddress materialAddress;
     };
 
   public:
@@ -49,4 +66,7 @@ class GameRenderer : public SingletonAtomic<GameRenderer>
 
     MeshPool     *meshPool;
     MaterialPool *materialPool;
+    ImagePool    *imagePool;
+
+    Buffers sceneDataBuffers;
 };

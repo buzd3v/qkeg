@@ -17,7 +17,7 @@ class MaterialPool : public SingletonAtomic<MaterialPool>
     [[nodiscard]] qTypes::MaterialId getPlaceholder();
 
     GPUMaterial getMaterial(qTypes::MaterialId id);
-
+    const GPUBuffer& getMaterialBuffer(){return materialBuffer;}
   private:
     std::vector<GPUMaterial> materials;
 

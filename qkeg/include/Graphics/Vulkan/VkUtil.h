@@ -35,7 +35,7 @@ struct RenderingCreateInfo
     VkImageView               depthImageView{VK_NULL_HANDLE};
     VkImageView               resolveImageView{VK_NULL_HANDLE};
     std::optional<glm::ivec4> colorImageClearValue;
-    std::optional<glm::ivec4> depthImageClearValue;
+    std::optional<float>      depthImageClearValue;
 };
 
 namespace VkUtil
@@ -52,4 +52,4 @@ VkPipelineLayout createPipelineLayout(VkDevice device, std::span<VkDescriptorSet
                                       std::span<VkPushConstantRange> pushConstantRange = {});
 
 RenderInfo createRenderingInfo(const RenderingCreateInfo &info);
-} // namespace VkUtil
+}; // namespace VkUtil

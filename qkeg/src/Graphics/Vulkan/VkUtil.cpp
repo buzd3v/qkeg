@@ -245,8 +245,8 @@ RenderInfo createRenderingInfo(const RenderingCreateInfo &info)
         };
         if (info.depthImageClearValue.has_value())
         {
-            auto color                          = info.depthImageClearValue.value();
-            ri.depthAttachment.clearValue.color = {(float)color.x, (float)color.y, (float)color.z, (float)color.w};
+            auto color                                       = info.depthImageClearValue.value();
+            ri.depthAttachment.clearValue.depthStencil.depth = color;
         }
     }
     if (info.resolveImageView)

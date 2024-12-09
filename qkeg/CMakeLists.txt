@@ -6,6 +6,7 @@ add_library(qkeg
 
   # main files
   src/Application.cpp
+  src/Graphics/Buffers.cpp
 
   # JsonParser files
   src/JsonParser/JsonNode.cpp
