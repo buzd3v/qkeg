@@ -2,7 +2,8 @@
 #include <glm/glm.hpp>
 #include <singleton_atomic.hpp>
 
-#include "Buffers.h";
+#include "Buffers.h"
+#include "Mesh/MeshDrawProps.h"
 #include "Pipeline/MeshPipeline.h"
 #include "Vulkan/GPUImage.h"
 
@@ -48,10 +49,15 @@ class GameRenderer : public SingletonAtomic<GameRenderer>
     VkFormat  getDrawImageFormat() const;
     VkFormat  getDepthImageFormat() const;
 
+  public:
+    // these function below to add data of each kind for rendering path
+    void addMesh(qTypes::MeshId meshId, qTypes::MaterialId matId, glm::mat4 &transform, MeshDrawProps props,
+                 bool castShadow = true);
+
   private:
     void createDrawImage(GPUDevice &device, glm::ivec2 renderSize, bool haveCreate);
 
-    MeshPipeline meshPipeline;
+    MeshPipeline meshPipeline{};
 
     ImageId drawImageId{qTypes::NULL_IMAGE_ID};
     ImageId depthImageId{qTypes::NULL_IMAGE_ID};
@@ -68,5 +74,6 @@ class GameRenderer : public SingletonAtomic<GameRenderer>
     MaterialPool *materialPool;
     ImagePool    *imagePool;
 
-    Buffers sceneDataBuffers;
+    Buffers                    sceneDataBuffers;
+    std::vector<MeshDrawProps> meshDrawProps;
 };

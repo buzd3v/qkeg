@@ -8,6 +8,10 @@
 #include "Graphics/Vulkan/VkInitializer.h"
 #include <GLFW/glfw3.h>
 
+#include "Mesh/MaterialPool.h"
+#include "Mesh/MeshPool.h"
+#include "Renderer/GameRenderer.h"
+
 void GPUDevice::cleanUp()
 {
     for (auto &frame : frames)
@@ -152,6 +156,20 @@ void GPUDevice::initSingletonComponent()
 
     { // construct ImagePool -> for image management
         ImagePool::Construct(*this);
+    }
+
+    { // MeshPool
+        MeshPool::Construct();
+    }
+
+    { // MaterialPool
+        MaterialPool::Construct();
+        MaterialPool::GetInstance()->init(*this);
+    }
+
+    { // Game Renderer
+        GameRenderer::Construct();
+        GameRenderer::GetInstance()->init(*this, {swapchain.getExtent().width, swapchain.getExtent().height});
     }
 }
 void GPUDevice::queryDeviceCapabilities()

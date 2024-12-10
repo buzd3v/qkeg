@@ -10,6 +10,8 @@ class Buffers
     void uploadData(VkCommandBuffer cmd, size_t bufferIndex, void *data, size_t dataSize, size_t offset = 0,
                     bool sync = true);
 
+    GPUBuffer &getBuffer() { return headBuffer; }
+
   private:
     size_t                 nBuffers{0};   // number of buffer
     size_t                 bufferSize{0}; // size of each buffer

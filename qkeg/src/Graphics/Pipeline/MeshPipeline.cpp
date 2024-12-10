@@ -10,6 +10,10 @@ void MeshPipeline::init(GPUDevice &device, VkFormat colorImageFormat, VkFormat d
     auto vertexShader   = VkUtil::loadShaderModule("Shaders/mesh.vert.spv", device.getDevice());
     auto fragmentShader = VkUtil::loadShaderModule("Shaders/mesh.frag.spv", device.getDevice());
 
+    if (!vertexShader || !fragmentShader)
+    {
+        throw std::runtime_error("Cannot found mesh shader");
+    }
     const auto &pushConstant = VkPushConstantRange{
         .stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
         .offset     = 0,
@@ -37,8 +41,8 @@ void MeshPipeline::init(GPUDevice &device, VkFormat colorImageFormat, VkFormat d
     vkDestroyShaderModule(device.getDevice(), fragmentShader, nullptr);
 }
 
-void MeshPipeline::draw(VkCommandBuffer cmd, GPUDevice &device, VkExtent2D renderView, std::span<MeshId> meshList,
-                        std::span<MeshDrawProps> &drawProps)
+void MeshPipeline::draw(VkCommandBuffer cmd, GPUDevice &device, VkExtent2D renderView, const Camera &camera,
+                        const GPUBuffer &sceneData, std::vector<MeshDrawProps> &drawProps)
 {
     auto bindlessSet = BindlessDescriptor::GetInstance();
     auto meshPool    = MeshPool::GetInstance();
@@ -65,11 +69,13 @@ void MeshPipeline::draw(VkCommandBuffer cmd, GPUDevice &device, VkExtent2D rende
     {
         // Draw mesh
         auto mesh = meshPool->getMesh(drawProp.meshID);
+
         vkCmdBindIndexBuffer(cmd, mesh.indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT32);
 
         // Submit push constants
         const auto pushConstant = PushConstant{
             .vertexBufferAddress = mesh.vertexBuffer.address,
+            .sceneDataBuffer     = sceneData.address,
             .transform           = drawProp.transform,
             .materialId          = drawProp.materialID,
         };

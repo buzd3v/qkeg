@@ -13,8 +13,7 @@ void Buffers::cleanup(GPUDevice &device)
     isInit = false;
 }
 
-void Buffers::uploadData(VkCommandBuffer cmd, size_t bufferIndex, void *data, size_t dataSize, size_t offset = 0,
-                         bool sync = true)
+void Buffers::uploadData(VkCommandBuffer cmd, size_t bufferIndex, void *data, size_t dataSize, size_t offset, bool sync)
 {
     assert(bufferIndex < nBuffers);
     assert(isInit);

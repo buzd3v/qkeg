@@ -45,7 +45,7 @@ class Camera
     void setProjection(const glm::mat4 projection) { this->projection = projection; }
 
     void setUseInverseDepth(bool b);
-    void useReverseYaxis(bool b);
+    void setUseReverseYaxis(bool b);
 
     bool isUseInverseDepth() { return useInverseDepth; }
     bool isUseReverseYAxis() { return reverseYAxis; }

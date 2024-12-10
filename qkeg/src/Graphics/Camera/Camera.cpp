@@ -23,7 +23,7 @@ void Camera::initCamera(float horiFov, float nearPlane, float farPlane, float as
             projection = glm::perspective(verticalFov, aspectRatio, nearPlane, farPlane);
         }
 
-        if (useReverseYaxis)
+        if (reverseYAxis)
         {
             projection[1][1] *= -1;
         }
@@ -45,7 +45,7 @@ void Camera::initCamera(float horiFov, float nearPlane, float farPlane, float as
         {
             projection = glm::ortho(-scaleX, scaleX, -scaleY, scaleY, nearPlane, farPlane);
         }
-        if (useReverseYaxis)
+        if (reverseYAxis)
         {
             projection[1][1] *= -1;
         }
@@ -92,7 +92,7 @@ void Camera::setUseInverseDepth(bool b)
     reinit();
 }
 
-void Camera::useReverseYaxis(bool b)
+void Camera::setUseReverseYaxis(bool b)
 {
     this->reverseYAxis = b;
     reinit();

@@ -66,7 +66,7 @@ void GameRenderer::draw(GPUDevice &device, VkCommandBuffer cmd, const Camera &ca
         });
 
         vkCmdBeginRendering(cmd, &renderInfo.renderingInfo);
-        // meshPipeline.draw(cmd, device, drawImage.getExtent2D(), )
+        meshPipeline.draw(cmd, device, drawImage.getExtent2D(), camera, sceneDataBuffers.getBuffer(), meshDrawProps);
         // TODO : complete deaw function
     }
 }
@@ -77,6 +77,19 @@ void GameRenderer::cleanUp(GPUDevice &device)
     materialPool = nullptr;
 }
 
+void GameRenderer::addMesh(qTypes::MeshId meshId, qTypes::MaterialId matId, glm::mat4 &transform, MeshDrawProps props,
+                           bool castShadow)
+{
+    const auto &mesh     = meshPool->getMesh(meshId);
+    const auto &material = materialPool->getMaterial(matId);
+
+    meshDrawProps.push_back(MeshDrawProps{
+        .transform  = transform,
+        .materialID = matId,
+        .meshID     = meshId,
+        .shadow     = castShadow,
+    });
+}
 void GameRenderer::createDrawImage(GPUDevice &device, glm::ivec2 renderSize, bool haveCreated)
 {
     auto pool   = ImagePool::GetInstance();
