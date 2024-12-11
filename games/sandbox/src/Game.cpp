@@ -61,3 +61,5 @@ void Game::customCleanup()
 {
     gradPipeline.cleanUp(gpuDevice);
 }
+
+void Game::initDrawObjects() {}

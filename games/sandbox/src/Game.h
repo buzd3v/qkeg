@@ -16,6 +16,8 @@ class Game : public Application
     virtual void customDraw() override;
     virtual void customCleanup() override;
 
+    void initDrawObjects();
+
   private:
     ImageId          gameImage{qTypes::NULL_IMAGE_ID};
     GradientPipeline gradPipeline;

@@ -77,6 +77,8 @@ function(get_qkeg_common_3d_shaders outVar)
     # imgui.vert
     # imgui.frag
     gradient.frag
+    mesh.vert
+    mesh.frag
   )
 
   get_target_property(QKEG_SOURCE_DIR qkeg SOURCE_DIR)

@@ -75,6 +75,9 @@ void GameRenderer::cleanUp(GPUDevice &device)
 {
     meshPool     = nullptr;
     materialPool = nullptr;
+
+    sceneDataBuffers.cleanup(device);
+    meshPipeline.cleanUp(device.getDevice());
 }
 
 void GameRenderer::addMesh(qTypes::MeshId meshId, qTypes::MaterialId matId, glm::mat4 &transform, MeshDrawProps props,

@@ -22,6 +22,9 @@ void GPUDevice::cleanUp()
     VkExcutor::GetInstance()->cleanup(device);
     BindlessDescriptor::GetInstance()->cleanUp(device);
     ImagePool::GetInstance()->destroyAll();
+    MeshPool::GetInstance()->cleanUp(*this);
+    MaterialPool::GetInstance()->cleanUp(*this);
+    GameRenderer::GetInstance()->cleanUp(*this);
 
     swapchain.cleanUp(device);
     vmaDestroyAllocator(allocator);
