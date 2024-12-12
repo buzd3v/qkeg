@@ -51,6 +51,10 @@ add_library(qkeg
 
   # math files
   src/Math/Transform.cpp
+
+  # ECS file
+  src/ECS/ComponentLoader.cpp
+  src/ECS/EntityLoader.cpp
 )
 
 add_library(qkeg::qkeg ALIAS qkeg)
@@ -68,6 +72,7 @@ target_include_directories(qkeg
   "${CMAKE_CURRENT_LIST_DIR}/include/Graphics"
   "${CMAKE_CURRENT_LIST_DIR}/third_party"
   "${CMAKE_CURRENT_LIST_DIR}/third_party/singleton/include"
+  "${CMAKE_CURRENT_LIST_DIR}/third_party/entt/src"
 
   # "${CMAKE_CURRENT_LIST_DIR}/include"
   PRIVATE

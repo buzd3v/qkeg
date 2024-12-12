@@ -31,3 +31,6 @@
 [submodule "qkeg/third_party/fastgltf"]
 	path = qkeg/third_party/fastgltf
 	url = https://github.com/spnda/fastgltf
+[submodule "qkeg/third_party/entt"]
+	path = qkeg/third_party/entt
+	url = https://github.com/skypjack/entt
