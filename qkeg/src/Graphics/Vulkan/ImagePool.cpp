@@ -106,3 +106,54 @@ void ImagePool::destroyAll()
 
     imagesProperties.clear();
 }
+
+ImageId ImagePool::loadCubemap(std::filesystem::path &path, std::array<std::string, 6> imgNames)
+{
+    GPUImage cubemapImg;
+
+    uint32_t    face      = 0;
+    bool        isCreated = false;
+    ImageStream is(device);
+
+    auto error = true;
+    if (error) // TODO: Error 001: GPUBuffer return the same pMappedMemory for 2 cubemap face -> error see below
+    {
+        return qTypes::NULL_IMAGE_ID;
+    }
+
+    for (auto imgName : imgNames)
+    {
+        RawImage rawImg;
+        if (std::filesystem::exists(path / imgName))
+        {
+            rawImg = is.loadRawImage(path / imgName);
+            assert(rawImg.channels == 4);
+            assert(rawImg.pixels != nullptr);
+        }
+        if (!isCreated)
+        {
+            cubemapImg = is.createGPUImage({
+                .format      = VK_FORMAT_R8G8B8A8_SRGB,
+                .usageFlags  = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT,
+                .createFlags = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT,
+                .extent =
+                    {
+                        .width  = (uint32_t)rawImg.width,
+                        .height = (uint32_t)rawImg.height,
+                        .depth  = 1,
+                    },
+                .numLayers = 6,
+                .isCubemap = true,
+            });
+            isCreated  = true;
+        }
+        else
+        {
+        }
+        is.uploadDataToGPUImage(
+            cubemapImg, rawImg.pixels, face); // ???????????????????? error here?????????????????????
+        face++;
+    }
+
+    return addImage(cubemapImg);
+}
