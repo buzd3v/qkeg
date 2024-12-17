@@ -30,12 +30,11 @@ inline constexpr glm::mat4 IDENTITY_MAT{1.f};
 class Transform
 {
   public:
-    Transform() : position(0.0f), rotation(glm::quat()), scale(1.0f) {}
     Transform(const glm::vec3 &pos, const glm::quat &rot, const glm::vec3 &scl)
         : position(pos), rotation(rot), scale(scl)
     {
     }
-
+    Transform() = default;
     Transform(const glm::mat4 &model);
 
     // Transform &operator==(Transform &other);  // copy constructor
@@ -49,9 +48,9 @@ class Transform
     glm::quat getRotation() const { return rotation; }
     glm::vec3 getScale() const { return scale; }
 
-    void setPosition(const glm::vec3 &pos);
-    void setRotation(const glm::quat &rot);
-    void setScale(const glm::vec3 &scl);
+    void setPosition(const glm::vec3 pos);
+    void setRotation(const glm::quat rot);
+    void setScale(const glm::vec3 scl);
 
     // Combine transformations into a single matrix
     glm::mat4 getTransformMatrix() const;
@@ -67,10 +66,10 @@ class Transform
     glm::vec3 front();
 
   private:
-    glm::vec3 position;
-    glm::vec3 scale;
-    glm::quat rotation;
+    glm::vec3 position{};
+    glm::vec3 scale{1.f};
+    glm::quat rotation = glm::identity<glm::quat>();
 
-    mutable glm::mat4 transformMat;
+    mutable glm::mat4 transformMat{1.f};
     mutable bool      isInit{false};
 };

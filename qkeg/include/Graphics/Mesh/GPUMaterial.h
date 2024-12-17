@@ -5,7 +5,7 @@ struct GPUMaterial
 {
     qColor::LinearColor baseColor{1.f, 1.f, 1.f, 1.f};
     float               metalicFactor{0.f};
-    float               roughnessFactor{0.7f};
+    float               roughnessFactor{0.f};
     float               emissiveFactor{0.f};
 
     ImageId diffuseTexture{qTypes::NULL_IMAGE_ID};

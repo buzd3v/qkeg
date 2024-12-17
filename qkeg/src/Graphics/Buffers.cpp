@@ -42,12 +42,12 @@ void Buffers::uploadData(VkCommandBuffer cmd, size_t bufferIndex, void *data, si
         };
         vkCmdPipelineBarrier2(cmd, &dependencyInfo);
     }
-    auto  stagingBuffer = stagingBuffers[bufferIndex];
+    auto &stagingBuffer = stagingBuffers[bufferIndex];
     auto *mappedData    = reinterpret_cast<uint8_t *>(stagingBuffer.info.pMappedData);
-    memcpy((void *)mappedData[offset], data, dataSize);
+    memcpy((void *)&mappedData[offset], data, dataSize); //kien.nx fixing eror uhile copy data to bufer 
 
     const VkBufferCopy2 region{
-        .sType     = VK_STRUCTURE_TYPE_COPY_BUFFER_INFO_2,
+        .sType     = VK_STRUCTURE_TYPE_BUFFER_COPY_2,//kien.nx avoid Vulkan validatio nerror
         .srcOffset = (VkDeviceSize)offset,
         .dstOffset = (VkDeviceSize)offset,
         .size      = dataSize,

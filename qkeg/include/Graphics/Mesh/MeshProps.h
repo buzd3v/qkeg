@@ -21,6 +21,13 @@ struct MeshProps
 
     std::vector<Vertex> vertices;
 
+    struct SkinningProps {
+        glm::vec<4, std::uint32_t> jointIds;
+        glm::vec4 weights;
+    };
+    std::vector<SkinningProps> skinningProps;
+    bool hasSkeleton{false};
+
     std::string name{};
     glm::vec3   minPos{};
     glm::vec3   maxPos{};

@@ -38,7 +38,7 @@ GPUMesh &MeshPool::getMesh(MeshId id)
 void MeshPool::loadMesh(GPUDevice &device, GPUMesh &mesh, MeshProps &data)
 {
     const auto indexBufferSize  = data.indices.size() * sizeof(uint32_t);
-    const auto vertexBufferSize = data.vertices.size() * sizeof(uint32_t);
+    const auto vertexBufferSize = data.vertices.size() * sizeof(MeshProps::Vertex);
 
     mesh.indexBuffer = GPUBufferBuilder{device, indexBufferSize}
                            .setBufferUsageFlags(VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT)
@@ -75,4 +75,34 @@ void MeshPool::loadMesh(GPUDevice &device, GPUMesh &mesh, MeshProps &data)
     });
 
     stagingBuffer.cleanup(device);
+
+    if (mesh.hasSkeleton) // only skeletal mesh
+    {
+        // create skinning data buffer
+        const auto skinningDataSize = data.vertices.size() * sizeof(MeshProps::SkinningProps);
+        mesh.skinningDataBuffer =
+            GPUBufferBuilder(device, skinningDataSize)
+                .setBufferUsageFlags(VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT |
+                                     VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT)
+                .build();
+
+        auto staging =
+            GPUBufferBuilder(device, skinningDataSize).setBufferUsageFlags(VK_BUFFER_USAGE_TRANSFER_SRC_BIT).build();
+
+        // copy data
+        void *dataToCopy = staging.info.pMappedData;
+        memcpy(dataToCopy, data.skinningProps.data(), skinningDataSize);
+
+        auto excutor = VkExcutor::GetInstance();
+        excutor->submit([&](VkCommandBuffer cmd) {
+            const auto vertexCopy = VkBufferCopy{
+                .srcOffset = 0,
+                .dstOffset = 0,
+                .size      = skinningDataSize,
+            };
+            vkCmdCopyBuffer(cmd, staging.buffer, mesh.skinningDataBuffer.buffer, 1, &vertexCopy);
+        });
+
+        staging.cleanup(device);
+    }
 }

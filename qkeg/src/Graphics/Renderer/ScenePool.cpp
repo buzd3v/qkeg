@@ -1,12 +1,9 @@
 #include "Renderer/ScenePool.h"
 #include "GLTFLoader/GLTFLoader.h"
 #include "Renderer/Scene.h"
-ScenePool::ScenePool(GPUDevice &device) : device(device)
-{
-    // TODO: insert constructor here
-}
+ScenePool::ScenePool(GPUDevice &device) : device(device) {}
 
-const Scene &ScenePool::addScene(const std::string &path, Scene &scene)
+const Scene &ScenePool::addScene(const std::string &path, Scene scene)
 {
     scene.path               = path;
     auto [it, insertedScene] = scenes.emplace(path, std::move(scene));
@@ -15,7 +12,6 @@ const Scene &ScenePool::addScene(const std::string &path, Scene &scene)
 
 const Scene &ScenePool::getScene(const std::string &path) const
 {
-    // TODO: insert return statement here
     if (auto it = scenes.find(path); it != scenes.end())
     {
         return it->second;
@@ -28,7 +24,6 @@ const Scene &ScenePool::getScene(const std::string &path) const
 
 const Scene &ScenePool::loadScene(const std::string &path)
 {
-    // TODO: insert return statement here
     if (auto it = scenes.find(path); it != scenes.end())
     {
         return it->second;
@@ -36,5 +31,10 @@ const Scene &ScenePool::loadScene(const std::string &path)
 
     auto scene = glTFUtil::loadGltfFile(std::filesystem::path(path), device);
 
-    return addScene(path, scene);
+    // return addScene(path, std::move(scene));
+    const auto [it2, inserted] = scenes.emplace(path, std::move(scene));
+    assert(inserted);
+    return it2->second;
 }
+
+void ScenePool::cleanUp(GPUDevice &device) {}

@@ -1,13 +1,16 @@
 #include "Camera/Camera.h"
 
-void Camera::initCamera(float horiFov, float nearPlane, float farPlane, float aspectRatio, float xScale, float yScale)
+void Camera::initCamera(ProjectionType type, float horiFov, float nearPlane, float farPlane, float aspectRatio,
+                        float xScale, float yScale)
+
 {
+    this->type = type;
     switch (type)
     {
     case ProjectionType::Perspective: {
         // finding vertical fov
         // ref https://calculator.academy/vertical-fov-calculator/
-        verticalFov = 2.f * glm::atan(glm::tan(horiFov / 2) * aspectRatio);
+        verticalFov = 2.f * glm::atan(1.f / aspectRatio * glm::tan(horiFov / 2.f)); //kien.nx fixing vFov calculation
 
         this->horizontalFov = horiFov;
         this->verticalFov   = verticalFov;
@@ -100,7 +103,7 @@ void Camera::setUseReverseYaxis(bool b)
 
 void Camera::reinit()
 {
-    initCamera(horizontalFov, nearPlane, farPlane, aspectRatio, scaleX, scaleY);
+    initCamera(type, horizontalFov, nearPlane, farPlane, aspectRatio, scaleX, scaleY);
 }
 
 glm::mat4 Camera::getViewMatrix()

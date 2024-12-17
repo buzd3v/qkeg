@@ -1,6 +1,13 @@
 #pragma once
 
 #include "Math/Transform.h"
+#include <glm/glm.hpp>
+namespace qConstant
+{
+constexpr float DEFAULT_NEAR_PLANE{1.f};
+constexpr float DEFAULT_FAR_PLANE{200.f};
+constexpr float DEFAULT_X_FOV = glm::radians(45.f);
+} // namespace qConstant
 
 class Camera
 {
@@ -19,8 +26,8 @@ class Camera
 
     // init
   public:
-    void    initCamera(float horiFov, float nearPlane, float farPlane, float aspectRatio = 1.f, float xScale = 1.f,
-                       float yScale = 1.f);
+    void    initCamera(ProjectionType type, float horiFov, float nearPlane, float farPlane, float aspectRatio = 1.f,
+                       float xScale = 1.f, float yScale = 1.f);
     Camera &setProjectionType(ProjectionType type)
     {
         this->type = type;
@@ -33,11 +40,11 @@ class Camera
     }
     // getter and setter
   public:
-    const Transform &getTransform() { return transform; }
-    const glm::vec3  getPosititon() { return transform.getPosition(); }
-    const glm::vec2  getPosititon2D() { return glm::vec2(transform.getPosition()); }
-    const glm::mat4  getProjection() { return projection; }
-    const glm::quat  getRotation() { return transform.getRotation(); }
+    const Transform &getTransform() const { return transform; }
+    const glm::vec3  getPosititon() const { return transform.getPosition(); }
+    const glm::vec2  getPosititon2D() const { return glm::vec2(transform.getPosition()); }
+    const glm::mat4  getProjection() const { return projection; }
+    const glm::quat  getRotation() const { return transform.getRotation(); }
 
     void setPosition(const glm::vec3 pos) { transform.setPosition(pos); }
     void setPosition(const glm::vec2 pos) { transform.setPosition(glm::vec3(pos, 0.f)); }
@@ -85,6 +92,6 @@ class Camera
 
     bool isInit{false};
     bool useInverseDepth{false}; // inverse depth for near->far = 1->0
-    bool reverseYAxis{false}; // since vulkan use positive Y axis point up, use this to make y axis point down to match
-                              // other app's coordinate space
+    bool reverseYAxis{true}; // since vulkan use positive Y axis point up, use this to make y axis point down to match
+                             // other app's coordinate space
 };

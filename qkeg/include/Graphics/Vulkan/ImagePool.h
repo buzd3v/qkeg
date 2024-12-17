@@ -3,12 +3,12 @@
 #include "GPUImage.h"
 
 #include <filesystem>
-#include <singleton_atomic.hpp>
+#include <singleton_dclp.hpp>
 #include <string>
 #include <unordered_map>
 
 class GPUDevice;
-class ImagePool : public SingletonAtomic<ImagePool>
+class ImagePool : public SingletonDclp<ImagePool>
 {
   public:
     ImagePool(GPUDevice &device);
@@ -26,12 +26,13 @@ class ImagePool : public SingletonAtomic<ImagePool>
     [[nodiscard]] ImageId requestImageId() const;
     [[nodiscard]] ImageId getWhiteTextureID() { return whiteTextureId; }
 
+    [[nodiscard]] ImageId loadCubemap(std::filesystem::path &path, std::array<std::string, 6> imgNames);
     // destroy all image
     void destroyAll();
 
-  private:
     ImageId addImage(GPUImage image, ImageId = GPUImage::NULL_BINDLESS_ID);
 
+  private:
   private:
     std::vector<GPUImage> images;
     std::vector<GPUImage> deletedImages;

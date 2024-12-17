@@ -16,4 +16,13 @@ struct GPUMesh
 
     uint32_t numIndices  = 0;
     uint32_t numVertices = 0;
+
+    bool hasSkeleton{false};
+    // skinned meshes only
+    GPUBuffer skinningDataBuffer;
+};
+
+struct SkinningMesh
+{
+    GPUBuffer skinnedVertexBuffer;
 };

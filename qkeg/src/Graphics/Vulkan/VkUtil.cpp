@@ -86,11 +86,6 @@ void generateMipmaps(VkCommandBuffer cmdBuf, VkImage image, VkExtent2D imgSize, 
 {
     for (std::uint32_t mip = 0; mip < mipLevels; mip++)
     {
-        const auto halfExtent = VkExtent2D{
-            .width  = imgSize.width / 2,
-            .height = imgSize.height / 2,
-        };
-
         const auto imgBarrier = VkImageMemoryBarrier2{
             .sType         = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
             .pNext         = nullptr,
@@ -107,19 +102,25 @@ void generateMipmaps(VkCommandBuffer cmdBuf, VkImage image, VkExtent2D imgSize, 
                     .baseMipLevel   = mip,
                     .levelCount     = 1,
                     .baseArrayLayer = 0,
-                    .layerCount     = VK_REMAINING_ARRAY_LAYERS,
+                    .layerCount     = 1,
                 },
         };
 
         auto dependencyInfo = VkDependencyInfo{
-            .sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
-            .pNext = nullptr,
+            .sType                   = VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
+            .imageMemoryBarrierCount = 1,
+            .pImageMemoryBarriers    = &imgBarrier,
         };
 
         vkCmdPipelineBarrier2(cmdBuf, &dependencyInfo);
 
         if (mip < mipLevels - 1)
         {
+            const auto halfExtent = VkExtent2D{
+                .width  = imgSize.width / 2,
+                .height = imgSize.height / 2,
+            };
+
             VkImageBlit2 blitRegion{
                 .sType = VK_STRUCTURE_TYPE_IMAGE_BLIT_2,
                 .pNext = nullptr,
@@ -130,23 +131,25 @@ void generateMipmaps(VkCommandBuffer cmdBuf, VkImage image, VkExtent2D imgSize, 
                         .baseArrayLayer = 0,
                         .layerCount     = 1,
                     },
-                .srcOffsets = {{
-                    .x = (int32_t)imgSize.width,
-                    .y = (int32_t)imgSize.height,
-                    .z = 1,
-                }},
+                .srcOffsets = {{},
+                               {
+                                   .x = (int32_t)imgSize.width,
+                                   .y = (int32_t)imgSize.height,
+                                   .z = 1,
+                               }},
                 .dstSubresource =
                     {
                         .aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
-                        .mipLevel       = mip,
+                        .mipLevel       = mip + 1,
                         .baseArrayLayer = 0,
                         .layerCount     = 1,
                     },
-                .dstOffsets = {{
-                    .x = (int32_t)halfExtent.width,
-                    .y = (int32_t)halfExtent.height,
-                    .z = 1,
-                }},
+                .dstOffsets = {{},
+                               {
+                                   .x = (int32_t)halfExtent.width,
+                                   .y = (int32_t)halfExtent.height,
+                                   .z = 1,
+                               }},
             };
 
             VkBlitImageInfo2 blitInfp{

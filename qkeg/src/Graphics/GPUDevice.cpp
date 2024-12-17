@@ -11,6 +11,7 @@
 #include "Mesh/MaterialPool.h"
 #include "Mesh/MeshPool.h"
 #include "Renderer/GameRenderer.h"
+#include "Renderer/ScenePool.h"
 
 void GPUDevice::cleanUp()
 {
@@ -170,6 +171,10 @@ void GPUDevice::initSingletonComponent()
         MaterialPool::GetInstance()->init(*this);
     }
 
+    { // ScenePool
+        ScenePool::Construct(*this);
+    }
+
     { // Game Renderer
         GameRenderer::Construct();
         GameRenderer::GetInstance()->init(*this, {swapchain.getExtent().width, swapchain.getExtent().height});
@@ -229,7 +234,7 @@ void GPUDevice::endFrame(VkCommandBuffer &cmdBuf, const GPUImage &drawImage, Fra
         return;
     }
     swapchain.resetFence(device, getCurrentFrameIndex());
-    VkImageLayout currentLayout;
+    VkImageLayout currentLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     // re-formatting image layout
     {
         // reformatting swapchain image for available to write
@@ -251,7 +256,7 @@ void GPUDevice::endFrame(VkCommandBuffer &cmdBuf, const GPUImage &drawImage, Fra
     {
         // change drawImage and swapchainimage format to availlable to copy
         VkUtil::transitionImage(
-            cmdBuf, drawImage.image, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+            cmdBuf, drawImage.image, VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
         VkUtil::transitionImage(cmdBuf, image, currentLayout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
         currentLayout      = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
@@ -272,9 +277,7 @@ void GPUDevice::endFrame(VkCommandBuffer &cmdBuf, const GPUImage &drawImage, Fra
 
     // make the swapchain image into presentable mode
     VkUtil::transitionImage(cmdBuf, image, currentLayout, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
-    // VkUtil::transitionImage(
-    //     cmdBuf, drawImage.image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-    // end the command buffer
+
     VK_CHECK(vkEndCommandBuffer(cmdBuf));
 
     // present
