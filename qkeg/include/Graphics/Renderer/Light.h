@@ -13,9 +13,11 @@ enum class LightType
 
 namespace qConstant
 {
-inline constexpr int TYPE_LIGHT_DIRECTIONAL = 0;
-inline constexpr int TYPE_LIGHT_POINT       = 1;
-inline constexpr int TYPE_LIGHT_SPOT        = 2;
+inline constexpr int   TYPE_LIGHT_DIRECTIONAL    = 0;
+inline constexpr int   TYPE_LIGHT_POINT          = 1;
+inline constexpr int   TYPE_LIGHT_SPOT           = 2;
+inline constexpr float DEFAULT_POINT_LIGHT_RANGE = 25.f;
+inline constexpr float DEFAULT_SPOT_LIGHT_RANGE  = 64.f;
 
 }; // namespace qConstant
 
@@ -37,18 +39,37 @@ struct Light
         float lightAngleOffset = -cos(innerCone) * lightAngleScale;
         this->scaleOffset      = glm::vec2{lightAngleScale, lightAngleOffset};
     }
+
+    uint32_t toType()
+    {
+        switch (type)
+        {
+        case (LightType::Directional): {
+            return qConstant::TYPE_LIGHT_DIRECTIONAL;
+        }
+        case LightType::Point: {
+            return qConstant::TYPE_LIGHT_POINT;
+        }
+        case LightType::Spot: {
+            return qConstant::TYPE_LIGHT_SPOT;
+        }
+        default:
+            return -1;
+        }
+        return -1;
+    }
 };
 
 // matching light.glsl
 struct LightProps
 {
-    glm::vec3           position;
-    uint32_t            type;
-    glm::vec3           direction;
-    float               range;
-    qColor::LinearColor color;
-    float               intensity;
-    glm::vec2           scaleOffset;
-    ImageId             shadowMap;
-    float               unused;
+    glm::vec3     position;
+    uint32_t      type;
+    glm::vec3     direction;
+    float         range;
+    qColor::Color color;
+    float         intensity;
+    glm::vec2     scaleOffset;
+    ImageId       shadowMap;
+    float         unused;
 };

@@ -48,7 +48,7 @@ void MeshPipeline::draw(VkCommandBuffer cmd, GPUDevice &device, VkExtent2D rende
     auto meshPool    = MeshPool::GetInstance();
 
     vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, meshPipeline);
-
+    bindlessSet->bindBindlessSet(cmd, meshPipelineLayout, VK_PIPELINE_BIND_POINT_GRAPHICS);
     const auto viewport = VkViewport{
         .x        = 0,
         .y        = 0,
@@ -78,6 +78,7 @@ void MeshPipeline::draw(VkCommandBuffer cmd, GPUDevice &device, VkExtent2D rende
             .sceneDataBuffer     = sceneData.address,
             .transform           = drawProp.transform,
             .materialId          = drawProp.materialID,
+            .padding             = 0,
         };
 
         vkCmdPushConstants(cmd,

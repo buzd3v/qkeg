@@ -42,7 +42,7 @@ void GradientPipeline::init(GPUDevice &gdevice)
     vkDestroyShaderModule(device, vertShader, nullptr);
 }
 
-void GradientPipeline::draw(VkCommandBuffer cmd, GPUDevice &device, GPUImage &image)
+void GradientPipeline::draw(VkCommandBuffer cmd, GPUDevice &device, const GPUImage &image)
 {
     auto *bindlessSet = BindlessDescriptor::GetInstance();
 
