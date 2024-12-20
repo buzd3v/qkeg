@@ -4,9 +4,9 @@
 #include <string>
 #include <unordered_map>
 
-#include "ActionTagHash.h"
+#include "ActionName.h"
 
-class ActionMapping
+class ActionBinding
 {
   public:
     void loadActions(const std::filesystem::path &path);
@@ -14,30 +14,30 @@ class ActionMapping
     void initActionState(const std::string &actionTagStr);
 
     // get action state
-    bool isPressed(ActionTagHash tag) const;
-    bool wasJustPressed(ActionTagHash tag) const;
-    bool wasJustRelease(ActionTagHash tag) const;
-    bool isHeld(ActionTagHash tag) const;
+    bool isPressed(ActionName tag) const;
+    bool wasJustPressed(ActionName tag) const;
+    bool wasJustRelease(ActionName tag) const;
+    bool isHeld(ActionName tag) const;
 
-    float getTimePressed(ActionTagHash tag) const;
-    float getAxisvalue(ActionTagHash tag) const;
+    float getTimePressed(ActionName tag) const;
+    float getAxisvalue(ActionName tag) const;
 
-    ActionTagHash getActionTagHash(const std::string &tagStr) const;
+    ActionName getActionName(const std::string &tagStr) const;
 
     void setActionKeyRepeatable(const std::string &tagStr, float startDelay, float keyRepeatPeriod);
 
   public:
     // functions below are used by InputManager to update actions and axes state
-    void setActionPressed(ActionTagHash tag);
-    void updateAxisState(ActionTagHash tag, float value);
-    // functions used by InputManager to manage state of ActionMapping
+    void setActionPressed(ActionName tag);
+    void updateAxisState(ActionName tag, float value);
+    // functions used by InputManager to manage state of ActionBinding
     void onNewFrame();
     void update(float dt);
     void resetState();
 
   private:
-    bool isActionMapped(ActionTagHash tag) const;
-    bool isAxisMapped(ActionTagHash tag) const;
+    bool isActionMapped(ActionName tag) const;
+    bool isAxisMapped(ActionName tag) const;
 
     struct ActionState
     {
@@ -61,9 +61,9 @@ class ActionMapping
         float pressedValue{0.f};
     };
 
-    std::unordered_map<std::string, ActionTagHash> actionHashes;
+    std::unordered_map<std::string, ActionName> actionHashes;
 
-    std::unordered_map<ActionTagHash, AxisState>        axisStates;
-    std::unordered_map<ActionTagHash, ActionState>      actionStates;
-    std::unordered_map<ActionTagHash, KeyRepeatedState> keyRepeatedStates;
+    std::unordered_map<ActionName, AxisState>        axisStates;
+    std::unordered_map<ActionName, ActionState>      actionStates;
+    std::unordered_map<ActionName, KeyRepeatedState> keyRepeatedStates;
 };

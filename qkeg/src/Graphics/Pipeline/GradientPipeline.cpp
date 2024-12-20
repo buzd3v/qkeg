@@ -42,41 +42,41 @@ void GradientPipeline::init(GPUDevice &gdevice)
     vkDestroyShaderModule(device, vertShader, nullptr);
 }
 
-void GradientPipeline::draw(VkCommandBuffer cmd, GPUDevice &device, const GPUImage &image)
+void GradientPipeline::draw(VkCommandBuffer cmd, GPUDevice &device, GPUImage &image)
 {
-    auto *bindlessSet = BindlessDescriptor::GetInstance();
+    // auto *bindlessSet = BindlessDescriptor::GetInstance();
 
-    auto renderingInfo = VkUtil::createRenderingInfo({
-        .renderExtent   = image.getExtent2D(),
-        .colorImageView = image.imageView,
-    });
+    // auto renderingInfo = VkUtil::createRenderingInfo({
+    //     .renderExtent   = image.getExtent2D(),
+    //     .colorImageView = image.imageView,
+    // });
 
-    vkCmdBeginRendering(cmd, &renderingInfo.renderingInfo);
-    vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, gradientPipeline);
-    bindlessSet->bindBindlessSet(cmd, gradientPipelineLayout, VK_PIPELINE_BIND_POINT_GRAPHICS);
+    // vkCmdBeginRendering(cmd, &renderingInfo.renderingInfo);
+    // vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, gradientPipeline);
+    // bindlessSet->bindBindlessSet(cmd, gradientPipelineLayout, VK_PIPELINE_BIND_POINT_GRAPHICS);
 
-    const auto viewport = VkViewport{
-        .x        = 0,
-        .y        = 0,
-        .width    = (float)image.getExtent2D().width,
-        .height   = (float)image.getExtent2D().height,
-        .minDepth = 0.f,
-        .maxDepth = 1.f,
-    };
-    vkCmdSetViewport(cmd, 0, 1, &viewport);
+    // const auto viewport = VkViewport{
+    //     .x        = 0,
+    //     .y        = 0,
+    //     .width    = (float)image.getExtent2D().width,
+    //     .height   = (float)image.getExtent2D().height,
+    //     .minDepth = 0.f,
+    //     .maxDepth = 1.f,
+    // };
+    // vkCmdSetViewport(cmd, 0, 1, &viewport);
 
-    const auto scissor = VkRect2D{
-        .offset = {},
-        .extent = image.getExtent2D(),
-    };
-    vkCmdSetScissor(cmd, 0, 1, &scissor);
+    // const auto scissor = VkRect2D{
+    //     .offset = {},
+    //     .extent = image.getExtent2D(),
+    // };
+    // vkCmdSetScissor(cmd, 0, 1, &scissor);
 
-    const auto pcs = PushConstant{
-        .imageID = image.getImageId(),
-    };
-    vkCmdPushConstants(cmd, gradientPipelineLayout, VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(PushConstant), &pcs);
+    // const auto pcs = PushConstant{
+    //     .imageID = image.getImageId(),
+    // };
+    // vkCmdPushConstants(cmd, gradientPipelineLayout, VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(PushConstant), &pcs);
 
-    vkCmdDraw(cmd, 3, 1, 0, 0);
+    // vkCmdDraw(cmd, 3, 1, 0, 0);
 
-    vkCmdEndRendering(cmd);
+    // vkCmdEndRendering(cmd);
 }

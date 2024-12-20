@@ -49,7 +49,8 @@ void Game::customInit()
             },
     };
     gameImage = imagePool->createImage(createInfo);
-    // inputManager.loadMapping("assets/settings/input_actions.json", "assets/settings/input/_mapping.json");
+
+    inputManager.loadInputBinding("assets/settings/input_actions.json", "assets/settings/input_mapping.json");
 
     GameRenderer::Construct();
     renderer = GameRenderer::GetInstance();

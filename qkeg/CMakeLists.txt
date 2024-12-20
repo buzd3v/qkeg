@@ -17,10 +17,11 @@ add_library(qkeg
   src/JsonParser/JsonColor.cpp
 
   # Input files
-  src/Input/ActionMapping.cpp
+  src/Input/ActionBinding.cpp
   src/Input/ButtonState.cpp
   src/Input/KeyboardState.cpp
   src/Input/InputManager.cpp
+  src/Input/MouseState.cpp
 
   # graphics files
   src/Graphics/GPUDevice.cpp

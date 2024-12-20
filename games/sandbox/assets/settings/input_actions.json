@@ -1,0 +1,27 @@
+{
+    "actions": [
+        "PrimaryAction",
+        "Sprint",
+        "Jump",
+        "Inventory",
+        "Pause",
+        "CursorLeft",
+        "CursorRight",
+        "CursorUp",
+        "CursorDown",
+        "MenuConfirm",
+        "MenuBack",
+        "CameraMoveFast",
+        "ToggleFreeCamera",
+        "ToggleImGuiVisibility"
+    ],
+    "axes": [
+        "MoveX",
+        "MoveY",
+        "CameraMoveX",
+        "CameraMoveY",
+        "CameraMoveZ",
+        "CameraRotateX",
+        "CameraRotateY"
+    ]
+}

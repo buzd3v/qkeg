@@ -34,6 +34,8 @@ class Game : public Application
     void postInitEnttCallback(entt::handle handle);
     void loadLevel(std::filesystem::path &path);
 
+    void handleInput(float deltaTime);
+
   private:
     ImageId          gameImage{qTypes::NULL_IMAGE_ID};
     GradientPipeline gradPipeline;

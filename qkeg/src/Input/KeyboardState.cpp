@@ -1,8 +1,8 @@
 #include "Input/KeyboardState.h"
 
+#include "Input/ActionBinding.h"
+#include "Input/InputBinding.h"
 #include "JsonParser/JsonNode.h"
-#include "Input/ActionMapping.h"
-#include "Input/InputMapping.h"
 
 void KeyboardState::keyCallback(GLFWwindow *window, GLFW_Keycode key, int scanCode, int action, int mods)
 {
@@ -19,19 +19,21 @@ void KeyboardState::handleEvent(GLFW_Keycode key, int action)
     keyStates[key].pressed = press;
 }
 
-void KeyboardState::loadMapping(const JsonNode &Node, ActionMapping &actionMapping)
+void KeyboardState::loadBinding(const JsonNode &Node, ActionBinding &actionBinding)
 {
-    for (auto &[tagStr, keysNode] : Node.getNode("action").getKeyValueMap())
+    auto actionNode = Node.getNode("keyboard").getNode("actions");
+    auto keyvalMap  = actionNode.getKeyValueMap();
+    for (auto &[tagStr, keysNode] : keyvalMap)
     {
-        const auto tag = actionMapping.getActionTagHash(tagStr);
+        const auto tag = actionBinding.getActionName(tagStr);
         for (auto &key : keysNode.asVectorOf<std::string>())
         {
             GLFW_Keycode keycode = keyboardMap.at(key);
-            addActionMapping(keycode, tag);
+            addActionBinding(keycode, tag);
         }
     }
-
-    for (auto &mappingNode : Node.getNode("axisButton").getVector())
+    auto axisButtonNode = Node.getNode("keyboard").getNode("axisButton");
+    for (auto &mappingNode : axisButtonNode.getVector())
     {
         std::string keyStr;
         mappingNode.get("key", keyStr);
@@ -43,9 +45,9 @@ void KeyboardState::loadMapping(const JsonNode &Node, ActionMapping &actionMappi
         mappingNode.get("scale", scale);
 
         const auto keycode = keyboardMap.at(keyStr);
-        const auto tag     = actionMapping.getActionTagHash(tagStr);
+        const auto tag     = actionBinding.getActionName(tagStr);
 
-        addAxisMapping(keycode, tag, scale);
+        addAxisBinding(keycode, tag, scale);
     }
 }
 
@@ -57,7 +59,7 @@ void KeyboardState::onNewFrame()
     }
 }
 
-void KeyboardState::update(float /*dt*/, ActionMapping &actionMapping)
+void KeyboardState::update(float /*dt*/, ActionBinding &actionBinding)
 {
     for (auto &[tag, keys] : keyActionBindings)
     {
@@ -65,7 +67,7 @@ void KeyboardState::update(float /*dt*/, ActionMapping &actionMapping)
         {
             if (keyStates[key].pressed)
             {
-                actionMapping.setActionPressed(tag);
+                actionBinding.setActionPressed(tag);
             }
         }
     }
@@ -76,18 +78,18 @@ void KeyboardState::update(float /*dt*/, ActionMapping &actionMapping)
         {
             for (const auto &binding : bindings)
             {
-                actionMapping.updateAxisState(binding.tag, binding.scale);
+                actionBinding.updateAxisState(binding.tag, binding.scale);
             }
         }
     }
 }
 
-void KeyboardState::addActionMapping(GLFW_Keycode key, ActionTagHash tag)
+void KeyboardState::addActionBinding(GLFW_Keycode key, ActionName tag)
 {
     keyActionBindings[tag].push_back(key);
 }
 
-void KeyboardState::addAxisMapping(GLFW_Keycode key, ActionTagHash tag, float scale)
+void KeyboardState::addAxisBinding(GLFW_Keycode key, ActionName tag, float scale)
 {
     axisButtonBindings[key].push_back(ButtonAxisBinding{tag, scale});
 }

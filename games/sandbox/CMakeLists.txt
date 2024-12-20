@@ -18,6 +18,7 @@ add_executable(sandbox
   src/Game.cpp
   src/main.cpp
   src/EntityInit.cpp
+  src/InputHandler.cpp
 )
 
 set_target_properties(sandbox PROPERTIES

@@ -7,24 +7,23 @@ void InputManager::init(GLFWwindow *window)
     glfwSetKeyCallback(window, keyCallback);
 }
 
-void InputManager::loadMapping(const std::filesystem::path &inputActionsPath,
-                               const std::filesystem::path &inputMappingPath)
+void InputManager::loadInputBinding(const std::filesystem::path &actionPath, const std::filesystem::path &mappingPath)
 {
-    actionMapping.loadActions(inputActionsPath);
+    actionBinding.loadActions(actionPath);
 
-    JsonFile file(inputMappingPath);
+    JsonFile file(mappingPath);
     if (!file.isGood())
     {
-        throw(std::runtime_error(fmt::format("Failed to open file: {}", inputMappingPath.string())));
+        throw(std::runtime_error(fmt::format("Failed to open file: {}", mappingPath.string())));
     }
     const auto rootNode = file.getRootNode();
 
-    keyboard.loadMapping(rootNode, actionMapping);
+    keyboard.loadBinding(rootNode, actionBinding);
 }
 
 void InputManager::onNewFrame()
 {
-    actionMapping.onNewFrame();
+    actionBinding.onNewFrame();
     keyboard.onNewFrame();
 }
 
@@ -32,9 +31,9 @@ void InputManager::handleEvent() {}
 
 void InputManager::update(float dt)
 {
-    keyboard.update(dt, actionMapping);
+    keyboard.update(dt, actionBinding);
 
-    actionMapping.update(dt);
+    actionBinding.update(dt);
 }
 
 void InputManager::keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
@@ -48,7 +47,7 @@ void InputManager::keyCallback(GLFWwindow *window, int key, int scancode, int ac
 
 void InputManager::resetInput()
 {
-    actionMapping.resetState();
+    actionBinding.resetState();
     keyboard.resetInput();
 }
 

@@ -3,26 +3,26 @@
 #include <array>
 #include <unordered_map>
 
-#include "ActionTagHash.h"
+#include "ActionName.h"
 #include "ButtonState.h"
 #include <glfw/glfw3.h>
 
 using GLFW_Keycode = int;
 
-class ActionMapping;
+class ActionBinding;
 class JsonNode;
 
 class KeyboardState
 {
   public:
-    void loadMapping(const JsonNode &Node, ActionMapping &actionMapping);
+    void loadBinding(const JsonNode &Node, ActionBinding &actionBinding);
 
     void onNewFrame();
     void handleEvent(GLFW_Keycode keycode, int action);
-    void update(float dt, ActionMapping &actionMapping);
+    void update(float dt, ActionBinding &actionBinding);
 
-    void addActionMapping(GLFW_Keycode key, ActionTagHash tag);
-    void addAxisMapping(GLFW_Keycode key, ActionTagHash tag, float scale);
+    void addActionBinding(GLFW_Keycode key, ActionName tag);
+    void addAxisBinding(GLFW_Keycode key, ActionName tag, float scale);
 
     bool wasJustPressed(GLFW_Keycode key) const;
     bool wasJustReleased(GLFW_Keycode key) const;
@@ -36,14 +36,14 @@ class KeyboardState
 
     struct ButtonAxisBinding
     {
-        ActionTagHash tag;
-        float         scale;
+        ActionName tag;
+        float      scale;
     };
 
     // state
     std::array<ButtonState, GLFW_KEY_LAST + 1> keyStates;
 
     // bindings
-    std::unordered_map<ActionTagHash, std::vector<GLFW_Keycode>>     keyActionBindings;
+    std::unordered_map<ActionName, std::vector<GLFW_Keycode>>        keyActionBindings;
     std::unordered_map<GLFW_Keycode, std::vector<ButtonAxisBinding>> axisButtonBindings;
 };

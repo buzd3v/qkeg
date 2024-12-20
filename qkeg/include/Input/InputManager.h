@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ActionMapping.h"
+#include "ActionBinding.h"
 #include "KeyboardState.h"
 #include <GLFW/glfw3.h>
 #include <filesystem>
@@ -10,7 +10,7 @@ class InputManager
   public:
     void init(GLFWwindow *window);
 
-    void loadMapping(const std::filesystem::path &inputActionsPath, const std::filesystem::path &inputMappingPath);
+    void loadInputBinding(const std::filesystem::path &inputActionsPath, const std::filesystem::path &inputMappingPath);
 
     void onNewFrame();
     void handleEvent();
@@ -19,13 +19,13 @@ class InputManager
     void cleanUp();
     void resetInput();
 
-    const ActionMapping &getActionMapping() const { return actionMapping; }
-    ActionMapping       &getActionMapping() { return actionMapping; }
+    const ActionBinding &getActionBinding() const { return actionBinding; }
+    ActionBinding       &getActionBinding() { return actionBinding; }
     KeyboardState       &getKeyboard() { return keyboard; }
     const KeyboardState &getKeyboard() const { return keyboard; }
 
   private:
     static void   keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
-    ActionMapping actionMapping;
+    ActionBinding actionBinding;
     KeyboardState keyboard;
 };

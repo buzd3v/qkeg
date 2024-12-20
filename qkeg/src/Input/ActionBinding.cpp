@@ -1,7 +1,7 @@
-#include "Input/ActionMapping.h"
+#include "Input/ActionBinding.h"
 #include "JsonParser/JsonFile.h"
 
-void ActionMapping::loadActions(const std::filesystem::path &path)
+void ActionBinding::loadActions(const std::filesystem::path &path)
 {
     JsonFile file(path);
 
@@ -22,26 +22,26 @@ void ActionMapping::loadActions(const std::filesystem::path &path)
     }
 }
 
-void ActionMapping::initAxisState(const std::string &axisTagStr)
+void ActionBinding::initAxisState(const std::string &axisTagStr)
 {
-    auto id                  = static_cast<ActionTagHash>(actionHashes.size());
+    auto id                  = static_cast<ActionName>(actionHashes.size());
     actionHashes[axisTagStr] = id;
     (void)axisStates[id];
 }
 
-void ActionMapping::initActionState(const std::string &actionTagStr)
+void ActionBinding::initActionState(const std::string &actionTagStr)
 {
-    auto id                    = static_cast<ActionTagHash>(actionHashes.size());
+    auto id                    = static_cast<ActionName>(actionHashes.size());
     actionHashes[actionTagStr] = id;
     (void)actionStates[id];
 }
 
-bool ActionMapping::isPressed(ActionTagHash tag) const
+bool ActionBinding::isPressed(ActionName tag) const
 {
     return actionStates.at(tag).isPressed;
 }
 
-bool ActionMapping::wasJustPressed(ActionTagHash tag) const
+bool ActionBinding::wasJustPressed(ActionName tag) const
 {
     if (!isActionMapped(tag))
         return false;
@@ -57,7 +57,7 @@ bool ActionMapping::wasJustPressed(ActionTagHash tag) const
     return false;
 }
 
-bool ActionMapping::wasJustRelease(ActionTagHash tag) const
+bool ActionBinding::wasJustRelease(ActionName tag) const
 {
     if (!isActionMapped(tag))
         return false;
@@ -67,7 +67,7 @@ bool ActionMapping::wasJustRelease(ActionTagHash tag) const
     return justRelease;
 }
 
-bool ActionMapping::isHeld(ActionTagHash tag) const
+bool ActionBinding::isHeld(ActionName tag) const
 {
     if (!isActionMapped(tag))
         return false;
@@ -77,7 +77,7 @@ bool ActionMapping::isHeld(ActionTagHash tag) const
     return justHold;
 }
 
-float ActionMapping::getTimePressed(ActionTagHash tag) const
+float ActionBinding::getTimePressed(ActionName tag) const
 {
     if (!isActionMapped(tag))
         return false;
@@ -86,7 +86,7 @@ float ActionMapping::getTimePressed(ActionTagHash tag) const
     return state.timePressed;
 }
 
-float ActionMapping::getAxisvalue(ActionTagHash tag) const
+float ActionBinding::getAxisvalue(ActionName tag) const
 {
     auto state = axisStates.find(tag);
 
@@ -98,18 +98,18 @@ float ActionMapping::getAxisvalue(ActionTagHash tag) const
     return 0.f;
 }
 
-void ActionMapping::setActionKeyRepeatable(const std::string &tagStr, float startDelay, float keyRepeatPeriod) {}
+void ActionBinding::setActionKeyRepeatable(const std::string &tagStr, float startDelay, float keyRepeatPeriod) {}
 
-bool ActionMapping::isAxisMapped(ActionTagHash tag) const
+bool ActionBinding::isAxisMapped(ActionName tag) const
 {
     return (tag != ACTION_NONE_HASH) && (axisStates.find(tag) != axisStates.end());
 }
 
-bool ActionMapping::isActionMapped(ActionTagHash tag) const
+bool ActionBinding::isActionMapped(ActionName tag) const
 {
     return (tag != ACTION_NONE_HASH) && (actionStates.find(tag) != actionStates.end());
 }
-ActionTagHash ActionMapping::getActionTagHash(const std::string &tagStr) const
+ActionName ActionBinding::getActionName(const std::string &tagStr) const
 {
     const auto &it = actionHashes.find(tagStr);
     if (it == actionHashes.end())
@@ -119,7 +119,7 @@ ActionTagHash ActionMapping::getActionTagHash(const std::string &tagStr) const
     return it->second;
 }
 
-void ActionMapping::setActionPressed(ActionTagHash tag)
+void ActionBinding::setActionPressed(ActionName tag)
 {
     if (!isActionMapped(tag))
     {
@@ -129,7 +129,7 @@ void ActionMapping::setActionPressed(ActionTagHash tag)
     state.isPressed = true;
 }
 
-void ActionMapping::updateAxisState(ActionTagHash tag, float value)
+void ActionBinding::updateAxisState(ActionName tag, float value)
 {
     if (!isAxisMapped(tag))
     {
@@ -138,7 +138,7 @@ void ActionMapping::updateAxisState(ActionTagHash tag, float value)
     axisStates.at(tag).value += value;
 }
 
-void ActionMapping::onNewFrame()
+void ActionBinding::onNewFrame()
 {
     for (auto &[tag, actionState] : actionStates)
     {
@@ -152,7 +152,7 @@ void ActionMapping::onNewFrame()
     }
 }
 
-void ActionMapping::update(float dt)
+void ActionBinding::update(float dt)
 {
     for (auto &[tag, state] : actionStates)
     {
@@ -172,7 +172,7 @@ void ActionMapping::update(float dt)
     }
 }
 
-void ActionMapping::resetState()
+void ActionBinding::resetState()
 {
     for (auto &[tag, state] : actionStates)
     {
