@@ -8,7 +8,7 @@
 #include "light.glsl"
 #include "material.glsl"
 
-struct SceneData {
+layout (buffer_reference, scalar) readonly buffer SceneDataBuffer {
     //camera data
     mat4 view;
     mat4 proj;
@@ -17,13 +17,17 @@ struct SceneData {
 
     vec3  ambientColor;
     float ambientIntensity;
-    MaterialBuffer materials;
-    // LightBuffer lights;
-};
+    
+    LightBuffer lights;
+    uint lightCounts;
+    int sunlightIndex;
 
-layout (buffer_reference, scalar) readonly buffer SceneBuffer
-{
-    SceneData scene;
+    MaterialBuffer materials;
 }sceneDataBuffer;
+
+// layout (buffer_reference, scalar) readonly buffer SceneBuffer
+// {
+//     SceneData scene;
+// }sceneDataBuffer;
 
 #endif

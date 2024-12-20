@@ -4,7 +4,7 @@
 
 #include "bindless.glsl"
 #include "scene.glsl"
-// #include "lighting.glsl"
+#include "lighting.glsl"
 #include "mesh_pcs.glsl"
 
 layout (location = 0) in vec3 inPos;
@@ -17,9 +17,9 @@ layout (location = 0) out vec4 outFragColor;
 
 void main()
 {
-    Material material = pcs.sceneData.scene.materials.data[pcs.materialID];
+    Material material = pcs.sceneData.materials.data[pcs.materialID];
 
-    vec4 diffuse = samplerTexture2D(material.diffuseTextureId, inUV, LINEAR_SAMPLER);
+    vec4 diffuse = sampleTexture2DLinear(material.diffuseTextureId, inUV);
     if (diffuse.a < 0.1) {
         discard;
     }
@@ -28,81 +28,77 @@ void main()
 
     vec3 normal = normalize(inNormal).rgb;
     if (inTangent != vec4(0.0)) {
-        // FIXME: sometimes Blender doesn't export tangents for some objects
-        // for some reason. When we will start computing tangents manually,
-        // this check can be removed
-        normal = samplerTexture2D(material.normalTextureId, inUV,LINEAR_SAMPLER).rgb;
-        // normal.y = 1 - normal.y; // flip to make OpenGL normal maps work
+       
+        normal =sampleTexture2DLinear(material.normalTextureId, inUV).rgb;
         normal = inTBN * normalize(normal * 2.0 - 1.0);
         normal = normalize(normal);
     }
 
-#ifdef PBR
-    float metallicF = material.metallicRoughnessEmissive.r;
-    float roughnessF = material.metallicRoughnessEmissive.g;
+// #ifdef PBR
+//     float metallicF = material.metallicRoughnessEmissive.r;
+//     float roughnessF = material.metallicRoughnessEmissive.g;
 
-    vec4 metallicRoughness = sampleTexture2DLinear(material.metallicRoughnessTex, inUV);
+//     vec4 metallicRoughness = sampleTexture2DLinear(material.metallicRoughnessTex, inUV);
 
-    float roughness = roughnessF * metallicRoughness.g;
-    // roughness *= roughness; // from perceptual to linear
-    roughness = max(roughness, 1e-2); // 0.0 roughness leads to NaNs
+//     float roughness = roughnessF * metallicRoughness.g;
+//     // roughness *= roughness; // from perceptual to linear
+//     roughness = max(roughness, 1e-2); // 0.0 roughness leads to NaNs
 
-    float metallic = metallicF * metallicRoughness.b;
+//     float metallic = metallicF * metallicRoughness.b;
 
-    vec3 dielectricSpecular = vec3(0.04);
-    vec3 black = vec3(0.0);
-    vec3 diffuseColor = mix(baseColor * (1.0 - dielectricSpecular.r), black, metallic);
-    vec3 f0 = mix(dielectricSpecular, baseColor, metallic);
-#else
+//     vec3 dielectricSpecular = vec3(0.04);
+//     vec3 black = vec3(0.0);
+//     vec3 diffuseColor = mix(baseColor * (1.0 - dielectricSpecular.r), black, metallic);
+//     vec3 f0 = mix(dielectricSpecular, baseColor, metallic);
+// #else
     vec3 diffuseColor = baseColor;
     float metallic = 0.f;
     float roughness = 1.f;
     vec3 f0 = vec3(0.0);
-#endif
+// #endif
 
-    vec3 cameraPos = pcs.sceneData.scene.cameraPos.xyz;
+    vec3 cameraPos = pcs.sceneData.cameraPos.xyz;
     vec3 fragPos = inPos.xyz;
     vec3 n = normal;
     vec3 v = normalize(cameraPos - fragPos);
 
-    // diffuseColor = vec3(1.0);
-    // baseColor = vec3(1.0);
-
     vec3 fragColor = vec3(0.0);
-    // for (int i = 0; i < pcs.sceneData.numLights; i++) {
-    //     Light light = pcs.sceneData.lights.data[i];
+    for (int i = 0; i < pcs.sceneData.lightCounts; i++) {
+        Light light = pcs.sceneData.lights.data[i];
 
-    //     vec3 l = light.direction;
-    //     if (light.type != TYPE_DIRECTIONAL_LIGHT) {
-    //         l = normalize(light.position - fragPos);
-    //     }
-    //     float NoL = clamp(dot(n, l), 0.0, 1.0);
+        vec3 l = light.direction;
+        if (light.type != TYPE_LIGHT_DIRECTIONAL) 
+        {
+            l = normalize(light.position - fragPos);
+        }
+        float NoL = clamp(dot(n, l), 0.0, 1.0);
 
-    //     float occlusion = 1.0;
-    //     if (light.type == TYPE_DIRECTIONAL_LIGHT) {
-    //         occlusion = calculateCSMOcclusion(
-    //                 fragPos, cameraPos, NoL,
-    //                 pcs.sceneData.csmShadowMapId,
-    //                 pcs.sceneData.cascadeFarPlaneZs,
-    //                 pcs.sceneData.csmLightSpaceTMs);
-    //     } else if (light.type == TYPE_POINT_LIGHT && light.shadowMapID != 0) {
-    //         occlusion = calculatePointShadow(
-    //                 fragPos, light.position, NoL,
-    //                 light.shadowMapID,
-    //                 pcs.sceneData.pointLightFarPlane);
-    //     }
+        float occlusion = 10.0;
+        // if (light.type == TYPE_LIGHT_DIRECTIONAL) {
+        //     occlusion = calculateCSMOcclusion(
+        //             fragPos, cameraPos, NoL,
+        //             pcs.sceneData.csmShadowMapId,
+        //             pcs.sceneData.cascadeFarPlaneZs,
+        //             pcs.sceneData.csmLightSpaceTMs);
+        // } else if (light.type == TYPE_LIGHT_POINT && light.shadowMapId != 0) {
+        //     occlusion = calculatePointShadow(
+        //             fragPos, light.position, NoL,
+        //             light.shadowMapID,
+        //             pcs.sceneData.pointLightFarPlane);
+        // }
 
-    //     fragColor += calculateLight(light, fragPos, n, v, l,
-    //             diffuseColor, roughness, metallic, f0, occlusion);
-    // }
+        fragColor += calculateLight(light, fragPos, n, v, l,
+                diffuseColor, roughness, metallic, f0, occlusion);
+    }
+    
 
     // emissive
     float emissiveF = material.metalRoughnessEmissive.b;
-    vec3 emissiveColor = emissiveF * samplerTexture2D(material.emissiveTextureId, inUV, LINEAR_SAMPLER).rgb;
+    vec3 emissiveColor = emissiveF * sampleTexture2DLinear(material.emissiveTextureId, inUV).rgb;
     fragColor += emissiveColor;
 
     // ambient
-    fragColor += baseColor * pcs.sceneData.scene.ambientColor * pcs.sceneData.scene.ambientIntensity;
+    fragColor += baseColor * pcs.sceneData.ambientColor * pcs.sceneData.ambientIntensity;
 
 	outFragColor = vec4(fragColor, 1.0f);
 }

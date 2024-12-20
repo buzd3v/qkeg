@@ -17,7 +17,7 @@ void main()
 {
     Vertex vert = pcs.vertexBuffer.vertices[gl_VertexIndex];
     vec4 worldPos = pcs.transform * vec4(vert.position, 1.f);
-    gl_Position = pcs.sceneData.scene.viewProj * worldPos;
+    gl_Position = pcs.sceneData.viewProj * worldPos;
 
     outPos = worldPos.xyz;
     outUV  = vec2(vert.uv_x, vert.uv_y);

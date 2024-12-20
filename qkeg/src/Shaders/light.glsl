@@ -3,9 +3,9 @@
 
 #extension GL_EXT_buffer_reference : require
 
-#define TYPE_LIGHT_DIRECTIONAL  0;
-#define TYPE_LIGHT_POINT        1;
-#define TYPE_LIGHT_SPOT         2;
+#define TYPE_LIGHT_DIRECTIONAL  0
+#define TYPE_LIGHT_POINT        1
+#define TYPE_LIGHT_SPOT         2
 
 struct Light
 {
@@ -13,7 +13,7 @@ struct Light
     uint  type;
     vec3  direction;
     float range;
-    vec4  color;
+    vec3  color;
     float intensity;
     vec2  scaleOffset;
     uint  shadowMapId;
