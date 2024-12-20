@@ -73,6 +73,36 @@ bool hasEmissiveTexure(const fastgltf::Material &material)
     const auto tex = material.emissiveTexture.has_value();
     return tex;
 }
+
+std::string getImageGltf(std::string name, std::filesystem::path path)
+{
+    const auto supported_extension = std::array{".jpg", ".png"};
+    for (auto ex : supported_extension)
+    {
+        auto temp = name + ex;
+        if (std::filesystem::exists(path / temp))
+            return temp;
+    }
+    return "";
+}
+
+std::string getImageUri(fastgltf::Image img)
+{
+    std::string path;
+    std::visit(fastgltf::visitor{
+                   [](auto &arg) {},
+                   [&](fastgltf::sources::URI &filePath) {
+                       assert(filePath.fileByteOffset == 0); // We don't support offsets with stbi.
+                       assert(filePath.uri.isLocalPath());   // We're only capable of loading local files.
+                       path = std::string(filePath.uri.path().begin(), filePath.uri.path().end()); // Thanks C++.
+                   },
+                   [&](fastgltf::sources::Array &vector) {},
+                   [&](fastgltf::sources::BufferView &view) {},
+               },
+               img.data);
+    return path;
+}
+
 std::filesystem::path getNormalMapTexturePath(const std::filesystem::path fileDir, const fastgltf::Asset &asset,
                                               const fastgltf::Material &material)
 {
@@ -80,7 +110,7 @@ std::filesystem::path getNormalMapTexturePath(const std::filesystem::path fileDi
     const auto &texId    = asset.textures[texIndex];
     const auto &image    = asset.images[texId.imageIndex.value()];
 
-    return fileDir / image.name;
+    return fileDir / getImageGltf(image.name.c_str(), fileDir);
 }
 std::filesystem::path getEmissiveTexturePath(const std::filesystem::path fileDir, const fastgltf::Asset &asset,
                                              const fastgltf::Material &material)
@@ -89,17 +119,17 @@ std::filesystem::path getEmissiveTexturePath(const std::filesystem::path fileDir
     const auto &texId    = asset.textures[texIndex];
     const auto &image    = asset.images[texId.imageIndex.value()];
 
-    return fileDir / image.name;
+    return fileDir / getImageGltf(image.name.c_str(), fileDir);
 }
 
 std::filesystem::path getDiffuseTexturePath(const std::filesystem::path fileDir, const fastgltf::Asset &asset,
                                             const fastgltf::Material &material)
 {
-    const auto  texIndex = material.pbrData.baseColorTexture.value().textureIndex;
-    const auto &texId    = asset.textures[texIndex];
-    const auto &image    = asset.images[texId.imageIndex.value()];
+    const auto            texIndex = material.pbrData.baseColorTexture.value().textureIndex;
+    const auto           &texId    = asset.textures[texIndex];
+    const fastgltf::Image image    = asset.images[texId.imageIndex.value()];
 
-    return fileDir / image.name;
+    return fileDir / getImageUri(image);
 }
 
 std::filesystem::path getMetallicRoughnessTexture(const std::filesystem::path fileDir, const fastgltf::Asset &asset,
@@ -109,7 +139,7 @@ std::filesystem::path getMetallicRoughnessTexture(const std::filesystem::path fi
     const auto &texId    = asset.textures[texIndex];
     const auto &image    = asset.images[texId.imageIndex.value()];
 
-    return fileDir / image.name;
+    return fileDir / getImageUri(image);
 }
 float getEmissiveStrength(const fastgltf::Material &material)
 {
@@ -204,17 +234,6 @@ std::vector<Datatype> getPackedBuffer(const fastgltf::Asset &asset, const fastgl
     return getPackedBuffer<Datatype>(asset, accessor);
 }
 
-// std::span<uint16_t> getPackedSpan(const fastgltf::Asset &asset, const fastgltf::Accessor &accessor)
-// {
-//     const auto &bufferView = asset.bufferViews[accessor.bufferViewIndex.value()];
-//     const auto  byteStride = bufferView.byteStride.value();
-//     assert(byteStride == sizeof(uint16_t)); // checking for tightly packed buffer
-
-//     const auto &buffer = asset.buffers.at(bufferView.bufferIndex);
-//     uint16_t   *data   = reinterpret_cast<uint16_t
-//     *>(std::get<fastgltf::sources::ByteView>(buffer.data).bytes.first()); return std::span{data, accessor.count};
-// }
-
 MeshProps loadPrimitives(const fastgltf::Asset &asset, const std::string name, const fastgltf::Primitive &primitive)
 {
     MeshProps props{.name = name};
@@ -224,7 +243,7 @@ MeshProps loadPrimitives(const fastgltf::Asset &asset, const std::string name, c
 
         auto &indicesAcessor = asset.accessors[primitive.indicesAccessor.value()];
         auto  indices        = getPackedBuffer<uint32_t>(asset, indicesAcessor);
-        // props.indices.assign(indices.begin(), indices.end());
+        props.indices.assign(indices.begin(), indices.end());
     }
 
     { // load positions
@@ -354,9 +373,13 @@ Light loadLight(const fastgltf::Light &gltfLight)
         .type      = chooseLightType(gltfLight.type),
         .color     = vec2Color(glm::make_vec3(gltfLight.color.data())),
         .intensity = getIntensity(gltfLight.intensity),
-        .range     = (float)gltfLight.range.value(),
+
     };
-    light.setConeAngle(gltfLight.innerConeAngle.value(), gltfLight.outerConeAngle.value());
+    light.range    = gltfLight.range.has_value() ? (float)gltfLight.range.value() : 0.f;
+    auto innerCone = gltfLight.innerConeAngle.has_value() ? gltfLight.innerConeAngle.value() : 0.f;
+    auto outerCone = gltfLight.outerConeAngle.has_value() ? gltfLight.outerConeAngle.value() : 0.f;
+
+    light.setConeAngle(innerCone, outerCone);
     return light;
 }
 
@@ -396,11 +419,12 @@ Transform gl2Transform(const fastgltf::Node &glNode)
 
 void loadNode(const fastgltf::Asset &asset, const fastgltf::Node &node, SceneNode &sceneNode)
 {
-    sceneNode.name        = node.name.c_str();
-    sceneNode.meshIndex   = (int)node.meshIndex.value();
-    sceneNode.lightIndex  = (int)node.lightIndex.value();
-    sceneNode.cameraIndex = (int)node.cameraIndex.value();
-    sceneNode.transform   = gl2Transform(node);
+    sceneNode.name          = node.name.c_str();
+    sceneNode.meshIndex     = node.meshIndex.has_value() ? (int)node.meshIndex.value() : -1;
+    sceneNode.lightIndex    = node.lightIndex.has_value() ? (int)node.lightIndex.value() : -1;
+    sceneNode.cameraIndex   = node.cameraIndex.has_value() ? (int)node.cameraIndex.value() : -1;
+    sceneNode.transform     = gl2Transform(node);
+    sceneNode.skeletonIndex = node.skinIndex.has_value() ? (int)node.skinIndex.value() : -1;
 
     sceneNode.children.resize(node.children.size());
     for (auto i = 0; i < node.children.size(); i++)
@@ -412,11 +436,210 @@ void loadNode(const fastgltf::Asset &asset, const fastgltf::Node &node, SceneNod
     }
 }
 
+Skeleton loadSkeleton(fastgltf::Asset &asset, fastgltf::Skin &skin, std::unordered_map<int, qTypes::JointId> &jointIds)
+{
+    const auto            &inverseBindAccessor       = asset.accessors[skin.inverseBindMatrices.value()];
+    const auto             packedInverseBindMatrices = getPackedBuffer<glm::mat4>(asset, inverseBindAccessor);
+    std::vector<glm::mat4> inverseBindMatrices(inverseBindAccessor.count);
+    inverseBindMatrices.assign(packedInverseBindMatrices.begin(), packedInverseBindMatrices.end());
+
+    // Prepare the skeleton structure
+    const auto jointCount = skin.joints.size();
+    Skeleton   skeleton;
+    skeleton.joints.reserve(jointCount);
+    skeleton.inverseMatricies = inverseBindMatrices;
+    skeleton.jointNames.resize(jointCount);
+
+    // Map GLTF node indices to joint IDs
+    jointIds.reserve(jointCount);
+
+    { // Load joint data
+        JointId currentJointId{0};
+        for (const auto &nodeIdx : skin.joints)
+        {
+            // Map node index to joint ID
+            jointIds.emplace(nodeIdx, currentJointId);
+
+            // Access the joint's node data
+            const auto &jointNode = asset.nodes[nodeIdx];
+
+            // Store the joint's name and local transformation
+            skeleton.jointNames[currentJointId] = jointNode.name;
+            skeleton.joints.push_back(Joint{
+                .id        = currentJointId,
+                .transform = gl2Transform(jointNode),
+            });
+
+            ++currentJointId;
+        }
+    }
+
+    { // Build the joint hierarchy
+        skeleton.hierachy.resize(jointCount);
+        for (JointId currentJointId = 0; currentJointId < skeleton.joints.size(); ++currentJointId)
+        {
+            const auto &jointNode = asset.nodes[skin.joints[currentJointId]];
+
+            // Link child joints to the current joint
+            for (const auto &childNodeIdx : jointNode.children)
+            {
+                const auto childJointId = jointIds.at(childNodeIdx);
+                skeleton.hierachy[currentJointId].child.push_back(childJointId);
+            }
+        }
+    }
+
+    // Return the constructed skeleton
+    return skeleton;
+}
+
+std::tuple<float, float> gl2MinMax(fastgltf::Accessor &accessor)
+{
+    double min, max;
+    std::visit(fastgltf::visitor{
+                   [&](auto &arg) {},
+                   [&](std::pmr::vector<double> vec) { max = vec[0]; },
+                   [&](std::pmr::vector<int64_t> vec) { max = vec[0]; },
+               },
+               accessor.max);
+    std::visit(fastgltf::visitor{
+                   [&](auto &arg) {},
+                   [&](std::pmr::vector<double> vec) { min = vec[0]; },
+                   [&](std::pmr::vector<int64_t> vec) { min = vec[0]; },
+               },
+               accessor.min);
+    return {(float)min, (float)max};
+}
+
+std::unordered_map<std::string, Animation> loadAnimation(fastgltf::Asset                         &asset,
+                                                         std::unordered_map<int, qTypes::JointId> jointIds,
+                                                         Skeleton                                 skeleton)
+{
+    std::unordered_map<std::string, Animation> animations(asset.animations.size());
+
+    for (const auto &glanim : asset.animations)
+    {
+        std::string animName    = std::string(glanim.name.c_str());
+        auto       &animation   = animations[animName];
+        animation.animationName = animName;
+
+        const auto jointCount = skeleton.joints.size();
+        animation.jointTracks.resize(jointCount);
+
+        for (const auto &channel : glanim.channels)
+        {
+            const auto &sampler = glanim.samplers[channel.samplerIndex];
+
+            auto      &timeAccessor = asset.accessors[sampler.inputAccessor];
+            const auto timeStamps   = getPackedBuffer<float>(asset, timeAccessor);
+
+            auto [min, max]             = gl2MinMax(timeAccessor);
+            animation.animationDuration = static_cast<float>(max - min);
+            if (animation.animationDuration = 0)
+            {
+                continue; // Skip animations with no duration
+            }
+
+            if (channel.path == fastgltf::AnimationPath::Weights)
+            {
+                continue;
+            }
+
+            const auto nodeIndex = channel.nodeIndex.value();
+            const auto jointId   = jointIds.at(nodeIndex);
+
+            const auto &outputAccessor = asset.accessors[sampler.outputAccessor];
+            assert(outputAccessor.componentType == fastgltf::ComponentType::Float);
+
+            if (channel.path == fastgltf::AnimationPath::Translation)
+            {
+                const auto translationKeys = getPackedBuffer<glm::vec3>(asset, outputAccessor);
+                auto      &pos             = animation.jointTracks[jointId].positions;
+
+                if (translationKeys.size() == 2 && translationKeys[0] == translationKeys[1])
+                {
+                    pos.push_back(translationKeys[0]);
+                }
+                else
+                {
+                    if (jointId == 0)
+                    {
+                        assert(translationKeys.size() != 2);
+                    }
+                    pos.reserve(translationKeys.size());
+                    for (const auto &key : translationKeys)
+                    {
+                        pos.push_back(key);
+                    }
+                }
+            }
+            else if (channel.path == fastgltf::AnimationPath::Rotation)
+            {
+                const auto rotationKeys = getPackedBuffer<glm::vec4>(asset, outputAccessor);
+                auto      &rotation     = animation.jointTracks[jointId].rotations;
+
+                if (rotationKeys.size() == 2 && rotationKeys[0] == rotationKeys[1])
+                {
+                    const auto     &rotationVec = rotationKeys[0];
+                    const glm::quat rotationQuat{rotationVec.w, rotationVec.x, rotationVec.y, rotationVec.z};
+                    rotation.push_back(rotationQuat);
+                }
+                else
+                {
+                    rotation.reserve(rotationKeys.size());
+                    for (const auto &rotationVec : rotationKeys)
+                    {
+                        const glm::quat rotationQuat{rotationVec.w, rotationVec.x, rotationVec.y, rotationVec.z};
+                        rotation.push_back(rotationQuat);
+                    }
+                }
+            }
+            else if (channel.path == fastgltf::AnimationPath::Scale)
+            {
+                const auto scaleKeys  = getPackedBuffer<glm::vec3>(asset, outputAccessor);
+                auto      &scaleTrack = animation.jointTracks[jointId].scales;
+
+                if (scaleKeys.size() == 2 && scaleKeys[0] == scaleKeys[1])
+                {
+                    scaleTrack.push_back(scaleKeys[0]);
+                }
+                else
+                {
+                    scaleTrack.reserve(scaleKeys.size());
+                    for (const auto &key : scaleKeys)
+                    {
+                        scaleTrack.push_back(key);
+                    }
+                }
+            }
+            else
+            {
+                assert(false && "Unexpected target_path in animation channel");
+            }
+        }
+    }
+
+    return animations;
+}
+
 Scene glTFUtil::loadGltfFile(std::filesystem::path path, GPUDevice &device)
 {
 
-    fastgltf::Asset asset = loadglTF(path);
-    Scene           scene{.path = path};
+    fmt::println("Start loading gltf {}", path.string());
+
+    static constexpr auto supportedExtensions = fastgltf::Extensions::KHR_lights_punctual |
+                                                fastgltf::Extensions::KHR_materials_emissive_strength |
+                                                fastgltf::Extensions::KHR_materials_variants;
+    fastgltf::Parser parser{supportedExtensions};
+    constexpr auto   gltfOptions = fastgltf::Options::DontRequireValidAssetMember | fastgltf::Options::AllowDouble |
+                                 fastgltf::Options::LoadGLBBuffers | fastgltf::Options::LoadExternalBuffers;
+
+    auto gltfFile = fastgltf::MappedGltfFile::FromPath(path);
+
+    auto             load  = parser.loadGltf(gltfFile.get(), path.parent_path(), gltfOptions);
+    fastgltf::Asset &asset = load.get();
+
+    Scene scene{.path = path};
     scene.models.reserve(asset.meshes.size());
     const auto fileDir   = path.parent_path();
     const auto mainScene = asset.scenes[asset.defaultScene.value()];
@@ -475,6 +698,21 @@ Scene glTFUtil::loadGltfFile(std::filesystem::path path, GPUDevice &device)
         for (const auto &light : asset.lights)
         {
             scene.lights.push_back(loadLight(light));
+        }
+    }
+
+    { // animations and skeleton
+        std::unordered_map<int, qTypes::JointId> jointIds;
+        scene.skeletons.reserve(asset.skins.size());
+        for (auto &skin : asset.skins)
+        {
+            scene.skeletons.push_back(loadSkeleton(asset, skin, jointIds));
+        }
+
+        if (!asset.skins.empty())
+        {
+            assert(asset.skins.size() == 1); // for now only one skeleton supported
+            scene.animations = loadAnimation(asset, jointIds, scene.skeletons[0]);
         }
     }
 
