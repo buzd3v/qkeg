@@ -27,6 +27,7 @@ class Level
     std::filesystem::path cubemapPath;
 
     std::string cameraSpawn;
+    std::string playerSpawn;
 
     qColor::LinearColor ambientColor;
     float               ambientIntensity;

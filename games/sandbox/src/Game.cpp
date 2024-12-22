@@ -27,10 +27,11 @@ void Game::loadAppSetting()
 
 void Game::customInit()
 {
-    imagePool    = ImagePool::GetInstance();
-    meshPool     = MeshPool::GetInstance();
-    materialPool = MaterialPool::GetInstance();
-    scenePool    = ScenePool::GetInstance();
+    imagePool     = ImagePool::GetInstance();
+    meshPool      = MeshPool::GetInstance();
+    materialPool  = MaterialPool::GetInstance();
+    scenePool     = ScenePool::GetInstance();
+    animationPool = AnimationPool::GetInstance();
 
     enttLoader = new EntityLoader(registry, "static_geometry");
     // init enttity
@@ -55,7 +56,7 @@ void Game::customInit()
     GameRenderer::Construct();
     renderer = GameRenderer::GetInstance();
     renderer->init(gpuDevice, params.renderSize);
-    std::filesystem::path levelPath("assets/levels/castle.json");
+    std::filesystem::path levelPath("assets/levels/burger_joint.json");
     loadLevel(levelPath);
 
     { // create camera
@@ -69,24 +70,71 @@ void Game::customInit()
                           qConstant::DEFAULT_FAR_PLANE,
                           aspectRatio);
     }
-    gradPipeline.init(gpuDevice);
+
+    auto playerHandle = enttLoader->createEntityFromPrefab("cato");
+    { // init player
+        playerHandle.emplace<PlayerComponent>();
+        auto playerSpawnHandle = EnttUtil::findEnttByName<SpawnComponent>(registry, level.playerSpawn);
+        if (playerSpawnHandle.entity() == entt::null)
+        {
+            fmt::println("could not find {}", level.playerSpawn);
+            return;
+        }
+        auto &spawnComponent     = playerSpawnHandle.get<TransformComponent>();
+        auto  spawnPos           = spawnComponent.transform.getPosition();
+        auto &transformComponent = playerHandle.get<TransformComponent>();
+        // auto  up                 = qConstant::AXES_UP;
+        transformComponent.transform.setRotation(spawnComponent.transform.getRotation());
+        transformComponent.transform.setPosition(spawnPos);
+        transformComponent.worldTransform = transformComponent.transform.getTransformMatrix();
+    }
+
+    { // camera handler
+        auto trackCam = std::make_unique<TrackingCameraHandler>();
+        trackCam->initialize(camera);
+        cameraManager.addHandler(dynamicCameraTag, std::make_unique<DynamicCameraHandler>());
+        cameraManager.addHandler(trackingCameraTag, std::move(trackCam));
+
+        auto camEntt       = EnttUtil::findEnttByName<CameraComponent>(registry, level.cameraSpawn);
+        bool shouldProcess = true;
+        if (camEntt.entity() == entt::null)
+        {
+            fmt::println("could not find {}", level.cameraSpawn);
+            shouldProcess = false;
+        }
+        if (shouldProcess)
+        {
+            const auto &transformComponent = camEntt.get<TransformComponent>();
+            cameraManager.setCamera(transformComponent.transform, camera);
+            cameraManager.setHandler(dynamicCameraTag);
+        }
+        else
+        {
+            cameraManager.setCamera(qConstant::IDENTITY_MAT, camera);
+            cameraManager.setHandler(trackingCameraTag);
+            auto &tch = static_cast<TrackingCameraHandler &>(cameraManager.getHandler(trackingCameraTag));
+            tch.trackingEntity(playerHandle, camera);
+        }
+        cameraManager.setHandler(dynamicCameraTag);
+    }
+
     // camera.setPosition(glm::vec3(31.7f, 0.6f, -12.3f));
     // camera.setRotation(glm::quat(0.1099f, 0.57f, 0.00771f, -0.8090f));
     // camera.setUseReverseYaxis(true);
     // camera.setUseInverseDepth(true);
 }
 
-void Game::customUpdate(float dt) {}
+void Game::customUpdate(float dt)
+{
+    cameraManager.update(camera, dt);
+    cameraManager.handleInput(inputManager, camera, dt);
+}
 
 void Game::customDraw()
 {
     { // scope init draw objs
         initDrawObjects();
     }
-    // auto cmd       = gpuDevice.beginFrame();
-    // auto drawImage = gpuDevice.queryImage(gameImage);
-    // VkUtil::transitionImage(cmd, drawImage.image, VK_IMAGE_LAYOUT_UNDEFINED,
-    // VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL); gradPipeline.draw(cmd, gpuDevice, drawImage);
 
     // render
     auto sceneData = GameRenderer::SceneProps{

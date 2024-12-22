@@ -1,5 +1,6 @@
 #include "Renderer/ScenePool.h"
 #include "GLTFLoader/GLTFLoader.h"
+#include "Renderer/AnimationPool.h"
 #include "Renderer/Scene.h"
 ScenePool::ScenePool(GPUDevice &device) : device(device) {}
 
@@ -32,6 +33,11 @@ const Scene &ScenePool::loadScene(const std::string &path)
     auto scene = glTFUtil::loadGltfFile(std::filesystem::path(path), device);
 
     // return addScene(path, std::move(scene));
+
+    if (!scene.animations.empty())
+    {
+        AnimationPool::GetInstance()->addAnimationFromGLTF(path, scene.animations);
+    }
     const auto [it2, inserted] = scenes.emplace(path, std::move(scene));
     assert(inserted);
     return it2->second;

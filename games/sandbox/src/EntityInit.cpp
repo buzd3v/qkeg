@@ -32,6 +32,10 @@ void Game::initEntityLoader()
 
 void Game::registerComponent(ComponentLoader &loader)
 {
+    loader.registerComponent<CameraComponent>("camera");
+    loader.registerComponent<SpawnComponent>("player_spawn");
+    loader.registerComponent<PlayerComponent>("player");
+
     loader.registerComponent("scene", [](entt::handle handle, SceneComponent &comp, const JsonNode &node) {
         node.getIfExists("scene", comp.sceneName);
         node.getIfExists("node", comp.sceneNodeName);
@@ -41,10 +45,65 @@ void Game::registerComponent(ComponentLoader &loader)
     });
 }
 
+std::string capComponentNodeName(std::string name)
+{
+    if (name.empty())
+    {
+        return {};
+    }
+    auto dotPos = name.find_last_of(".");
+    if (dotPos == std::string::npos || dotPos == name.size() - 1)
+    {
+    }
+    return name.substr(dotPos + 1, name.size());
+}
+
 void Game::postInitEnttCallback(entt::handle handle)
 {
+    entt::entity entt              = handle.entity();
+    auto         skeletonComponent = handle.try_get<SkeletonComponent>();
+    if (skeletonComponent)
+    {
+        initAnimationEntity(handle);
+    }
+
+    if (handle.any_of<CameraComponent, PlayerComponent, SpawnComponent>())
+    {
+        auto &name = handle.get<SceneComponent>().sceneNodeName;
+        if (name.empty())
+        {
+            return; // do not registering any for this component
+        }
+        handle.get_or_emplace<NameComponent>().name = capComponentNodeName(name);
+    }
     for (const auto &c : handle.get<HierarchyComponent>().children)
     {
         postInitEnttCallback(c);
+    }
+}
+
+void Game::initAnimationEntity(entt::handle handle)
+{
+    auto &skeletonComponent = handle.get<SkeletonComponent>();
+    assert(skeletonComponent.skinId != -1);
+
+    const auto &sceneComponent = handle.get<SceneComponent>();
+    const auto &scene          = scenePool->loadScene(sceneComponent.sceneName);
+
+    skeletonComponent.skeleton   = scene.skeletons[skeletonComponent.skinId];
+    skeletonComponent.animations = &animationPool->getAnimations(sceneComponent.sceneName);
+
+    auto &meshComponent = handle.get<MeshComponent>();
+    skeletonComponent.skinMeshes.reserve(meshComponent.meshes.size());
+    for (auto meshId : meshComponent.meshes)
+    {
+        SkinningMesh skinMesh;
+        auto        &mesh = meshPool->getMesh(meshId);
+        skinMesh.skinnedVertexBuffer =
+            GPUBufferBuilder{gpuDevice, mesh.numVertices * sizeof(MeshProps)}
+                .setBufferUsageFlags(VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT |
+                                     VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT)
+                .build();
+        skeletonComponent.skinMeshes.push_back(skinMesh);
     }
 }

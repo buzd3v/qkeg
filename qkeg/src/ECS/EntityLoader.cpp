@@ -95,7 +95,11 @@ entt::handle EntityLoader::createEntity(const std::string &prefabName, const Jso
         componentLoader.makeComponent(handle, componentName, componentNode);
     }
     handle.get<MetadataComponent>().debugString = prefabName;
-
+    // if (handle.entity() == (entt::entity)1363)
+    // {
+    //     auto &sc   = handle.get<SceneComponent>();
+    //     auto  name = sc.sceneName;
+    // }
     if (defaultPostInitEnttCallback)
     {
         defaultPostInitEnttCallback(handle);
@@ -127,7 +131,13 @@ entt::handle EntityLoader::createEntity(std::string prefabName, const nlohmann::
         return createEntity(actualPrefabName, loader);
     }
 
-    return createEntity(actualPrefabName, prefabLoader);
+    entt::handle handle = createEntity(actualPrefabName, prefabLoader);
+    // if (handle.entity() == (entt::entity)1363)
+    // {
+    //     auto &sc   = handle.get<SceneComponent>();
+    //     auto  name = sc.sceneName;
+    // }
+    return handle;
 }
 
 const std::string &EntityLoader::getMappedPrefabName(const std::string &prefabName) const
@@ -165,8 +175,16 @@ EntityLoader::EntityLoader(entt::registry &reg, std::string defaultPrefabName)
 entt::handle EntityLoader::createEntityFromPrefab(std::string prefabName, bool callPostInit)
 {
     // assert(defaultPostInitEnttCallback);
-    auto handle = createEntity(prefabName);
-
+    // auto handle = createEntity(prefabName);
+    entt::handle handle;
+    if (prefabName == "cato")
+    {
+        handle = createEntity(prefabName);
+    }
+    else
+    {
+        handle = createEntity(prefabName);
+    }
     auto &sceneComponent = handle.get<SceneComponent>();
     if (!sceneComponent.sceneName.empty())
     {
@@ -296,7 +314,7 @@ void EntityLoader::loadNode(entt::handle handle, const Scene &scene, const Scene
             continue;
         }
 
-        assert(!childNode.children.empty());
+        assert(childNode.children.empty());
 
         if (childNode.meshIndex != -1)
         {

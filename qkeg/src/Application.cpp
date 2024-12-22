@@ -103,6 +103,8 @@ void Application::run()
         {
             inputManager.onNewFrame(); // reset input state on new frame
             glfwPollEvents();          // manage glfw window polling
+            inputManager.update(dt);
+            customUpdate(dt);
         }
 
         // drawPhase

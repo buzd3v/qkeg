@@ -50,7 +50,7 @@ inline void ComponentLoader::registerComponent(std::string componentName, Func f
                   "the first argument of the lambda should be entt::handle");
 
     const auto [temp, inserted] = marker.emplace(componentName, [func](entt::handle &handle, const JsonNode &compNode) {
-        auto comp = handle.get_or_emplace<ComponentType>();
+        auto &comp = handle.get_or_emplace<ComponentType>();
         func(handle, comp, compNode);
     });
     if (!inserted)

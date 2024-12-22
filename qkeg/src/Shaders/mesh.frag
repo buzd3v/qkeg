@@ -73,7 +73,7 @@ void main()
         }
         float NoL = clamp(dot(n, l), 0.0, 1.0);
 
-        float occlusion = 10.0;
+        float occlusion = 5.0;
         // if (light.type == TYPE_LIGHT_DIRECTIONAL) {
         //     occlusion = calculateCSMOcclusion(
         //             fragPos, cameraPos, NoL,

@@ -10,6 +10,7 @@
 
 #include "Mesh/MaterialPool.h"
 #include "Mesh/MeshPool.h"
+#include "Renderer/AnimationPool.h"
 #include "Renderer/GameRenderer.h"
 #include "Renderer/ScenePool.h"
 
@@ -169,6 +170,10 @@ void GPUDevice::initSingletonComponent()
     { // MaterialPool
         MaterialPool::Construct();
         MaterialPool::GetInstance()->init(*this);
+    }
+
+    { // animation pool
+        AnimationPool::Construct();
     }
 
     { // ScenePool

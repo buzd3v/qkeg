@@ -20,6 +20,7 @@ void Level::loadLevelFile(std::filesystem::path &path)
     rtNode.getIfExists("background_music", bgmPath);
     rtNode.getIfExists("cubemap", cubemapPath);
     rtNode.getIfExists("default_camera", cameraSpawn);
+    rtNode.getIfExists("default_spawn", playerSpawn);
 
     if (rtNode.hasKey("ambient"))
     {

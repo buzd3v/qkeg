@@ -40,11 +40,11 @@ class Camera
     }
     // getter and setter
   public:
-    const Transform &getTransform() const { return transform; }
-    const glm::vec3  getPosititon() const { return transform.getPosition(); }
-    const glm::vec2  getPosititon2D() const { return glm::vec2(transform.getPosition()); }
-    const glm::mat4  getProjection() const { return projection; }
-    const glm::quat  getRotation() const { return transform.getRotation(); }
+    Transform      &getTransform() { return transform; }
+    const glm::vec3 getPosititon() const { return transform.getPosition(); }
+    const glm::vec2 getPosititon2D() const { return glm::vec2(transform.getPosition()); }
+    const glm::mat4 getProjection() const { return projection; }
+    const glm::quat getRotation() const { return transform.getRotation(); }
 
     void setPosition(const glm::vec3 pos) { transform.setPosition(pos); }
     void setPosition(const glm::vec2 pos) { transform.setPosition(glm::vec3(pos, 0.f)); }

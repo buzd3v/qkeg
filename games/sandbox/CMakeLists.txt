@@ -19,6 +19,9 @@ add_executable(sandbox
   src/main.cpp
   src/EntityInit.cpp
   src/InputHandler.cpp
+  src/CameraManager.cpp
+  src/DynamicCameraHandler.cpp
+  src/TrackingCameraHandler.cpp
 )
 
 set_target_properties(sandbox PROPERTIES

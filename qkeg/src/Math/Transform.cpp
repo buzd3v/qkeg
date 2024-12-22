@@ -102,11 +102,11 @@ glm::vec3 Transform::up()
 }
 glm::vec3 Transform::right()
 {
-	//kien.nx fix wrong typing error begin
+    // kien.nx fix wrong typing error begin
     return rotation * qConstant::AXES_RIGHT;
 }
 glm::vec3 Transform::front()
 {
     return rotation * qConstant::AXES_FRONT;
-	//kien.nx fix wrong typing error end
+    // kien.nx fix wrong typing error end
 }

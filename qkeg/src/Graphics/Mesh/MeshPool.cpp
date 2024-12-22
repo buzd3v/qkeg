@@ -15,6 +15,7 @@ MeshId MeshPool::addMesh(GPUDevice &device, MeshProps &mesh)
     GPUMesh gpuMesh{
         .numIndices  = (uint32_t)mesh.indices.size(),
         .numVertices = (uint32_t)mesh.vertices.size(),
+        .hasSkeleton = mesh.hasSkeleton,
     };
 
     // incase calculate bounding sphere

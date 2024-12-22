@@ -18,7 +18,7 @@ void ActionBinding::loadActions(const std::filesystem::path &path)
     }
     for (const auto &axis : rootNode.getNode("axes").asVectorOf<std::string>())
     {
-        initActionState(axis);
+        initAxisState(axis);
     }
 }
 
@@ -131,7 +131,8 @@ void ActionBinding::setActionPressed(ActionName tag)
 
 void ActionBinding::updateAxisState(ActionName tag, float value)
 {
-    if (!isAxisMapped(tag))
+    bool isMapped = isAxisMapped(tag);
+    if (!isMapped)
     {
         return;
     }

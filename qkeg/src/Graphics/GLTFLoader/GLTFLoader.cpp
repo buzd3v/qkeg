@@ -321,11 +321,18 @@ MeshProps loadPrimitives(const fastgltf::Asset &asset, const std::string name, c
             assert(joints.size() == numVertices && "Numbers of joints and vertices are not match");
             assert(weights.size() == numVertices && "Numbers of wieghts and vertices are not match");
 
-            // skeleton
-            //  for (auto i = 0; i < tangents.size(); i++)
-            //  {
-            //      props.vertices[i].tangent = tangents[i];
-            //  }
+            props.hasSkeleton = true;
+            props.skinningProps.resize(numVertices);
+
+            for (std::size_t i = 0; i < joints.size(); ++i)
+            {
+                props.skinningProps[i].jointIds = glm::uvec4{joints[i][0], joints[i][1], joints[i][2], joints[i][3]};
+            }
+
+            for (std::size_t i = 0; i < weights.size(); ++i)
+            {
+                props.skinningProps[i].weights = glm::vec4{weights[i][0], weights[i][1], weights[i][2], weights[i][3]};
+            }
         }
     }
     return props;
