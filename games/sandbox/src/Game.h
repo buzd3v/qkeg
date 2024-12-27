@@ -16,7 +16,6 @@
 #include "DynamicCameraHandler.h"
 #include "TrackingCameraHandler.h"
 
-
 #include "ECS/ComponentLoader.h"
 #include "ECS/EntityLoader.h"
 #include "ECS/EntityUtil.h"
@@ -44,6 +43,7 @@ class Game : public Application
 
     void handleInput(float deltaTime);
     void handlePlayerInput(float dt);
+    void updateLogic(float dt);
 
   private:
     ImageId          gameImage{qTypes::NULL_IMAGE_ID};
@@ -59,9 +59,10 @@ class Game : public Application
     std::string   dynamicCameraTag{"dynamic"};
     std::string   trackingCameraTag{"tracking"};
 
-    Camera        camera;
+    Camera camera;
 
     entt::registry registry;
+    entt::handle   playerHandle;
     EntityLoader  *enttLoader;
 
     Level level;

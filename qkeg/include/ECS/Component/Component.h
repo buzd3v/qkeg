@@ -4,6 +4,7 @@
 #include "LightComponent.h"
 #include "MeshComponent.h"
 #include "MetadataComponent.h"
+#include "MovementComponent.h"
 #include "NameComponent.h"
 #include "SceneComponent.h"
 #include "SkeletonComponent.h"

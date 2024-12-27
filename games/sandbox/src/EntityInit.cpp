@@ -36,6 +36,10 @@ void Game::registerComponent(ComponentLoader &loader)
     loader.registerComponent<SpawnComponent>("player_spawn");
     loader.registerComponent<PlayerComponent>("player");
 
+    loader.registerComponent("movement", [](entt::handle e, MovementComponent &mc, const JsonNode &loader) {
+        loader.get("maxSpeed", mc.maxSpeed);
+    });
+
     loader.registerComponent("scene", [](entt::handle handle, SceneComponent &comp, const JsonNode &node) {
         node.getIfExists("scene", comp.sceneName);
         node.getIfExists("node", comp.sceneNodeName);

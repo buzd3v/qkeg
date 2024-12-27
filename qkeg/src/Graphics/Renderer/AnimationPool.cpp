@@ -37,14 +37,14 @@ void AnimationPool::loadFromDirectory(std::filesystem::path &glPath)
         std::string path;
         animNode.get("mesh_path", path);
         auto &animData = aniPropsMaps[path];
-        for (auto &[name, node] : animNode.getNode("animations").getKeyValueMap())
+        for (auto &[name, childNode] : animNode.getNode("animations").getKeyValueMap())
         {
             AniProperties props;
-            animNode.get("looped", props.isLoop, true);
-            animNode.get("startFrame", props.startFrame, 0);
-            if (animNode.hasKey("events"))
+            childNode.get("looped", props.isLoop, true);
+            childNode.get("startFrame", props.startFrame, 0);
+            if (childNode.hasKey("events"))
             {
-                for (auto &eventNode : animNode.getNode("events").getVector())
+                for (auto &eventNode : childNode.getNode("events").getVector())
                 {
                     std::string name;
                     int         frame;

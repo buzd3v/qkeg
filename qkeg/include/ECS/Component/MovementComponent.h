@@ -5,11 +5,12 @@
 
 struct MovementComponent
 {
-    glm::vec3 prevFramePosition;
-    glm::vec3 effectiveVelocity; // (newPos - prevPos) / dt
+    glm::vec3 maxSpeed;
+    glm::vec3 prevPos;
+    glm::vec3 velocity; // (newPos - prevPos) / dt
 
-    glm::quat startHeading;
-    glm::quat targetHeading;
+    glm::quat startRotation;
+    glm::quat targetRotation;
     float     rotationTime{0.f};
-    float     rotationProgress{0.f}; // from [0 to rotationTime] (used for slerp)
+    float     elapsedTime{0.f}; // use this for smooth rotation
 };

@@ -67,8 +67,11 @@ add_library(qkeg
   src/ECS/EntityLoader.cpp
   src/ECS/EntityUtil.cpp
   src/ECS/System/TransformSystem.cpp
+  src/ECS/System/PlayerSkeletonSystem.cpp
+  src/ECS/System/SkeletonSystem.cpp
+  src/ECS/System/MovementSystem.cpp
 
-  # LLevel
+  # Level
   src/Level/Level.cpp
 )
 

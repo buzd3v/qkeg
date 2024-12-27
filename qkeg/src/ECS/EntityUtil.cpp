@@ -79,3 +79,32 @@ std::string EnttUtil::getPrefabNameFromSceneNode(const EntityLoader &el, const S
     }
     return defaultPrefabName;
 }
+
+void EnttUtil::setAnimation(entt::handle handle, std::string animationName)
+{
+    auto &skeletonComp = handle.get<SkeletonComponent>();
+    // if (!skeletonComp)
+    // {
+    //     return;
+    // }
+    assert(skeletonComp.animations);
+    skeletonComp.animator.assignAnimation(skeletonComp.skeleton, skeletonComp.animations->at(animationName));
+}
+
+void EnttUtil::smoothRotate(entt::handle handle, glm::quat target, float time)
+{
+    auto &transform = handle.get<TransformComponent>();
+    auto &movement  = handle.get<MovementComponent>();
+
+    movement.startRotation  = transform.transform.getRotation();
+    movement.targetRotation = target;
+
+    // the angle of 2 vec is > 90 so we find the shortest way to rotate
+    if (glm::dot(movement.startRotation, movement.targetRotation) < 0)
+    {
+        movement.targetRotation = -movement.targetRotation;
+    }
+
+    movement.rotationTime = time;
+    movement.elapsedTime  = 0.f;
+}

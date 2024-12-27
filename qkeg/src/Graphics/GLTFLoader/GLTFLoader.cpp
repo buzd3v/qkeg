@@ -518,9 +518,9 @@ std::tuple<float, float> gl2MinMax(fastgltf::Accessor &accessor)
     return {(float)min, (float)max};
 }
 
-std::unordered_map<std::string, Animation> loadAnimation(fastgltf::Asset                         &asset,
-                                                         std::unordered_map<int, qTypes::JointId> jointIds,
-                                                         Skeleton                                 skeleton)
+std::unordered_map<std::string, Animation> loadAnimation(fastgltf::Asset                          &asset,
+                                                         std::unordered_map<int, qTypes::JointId> &jointIds,
+                                                         Skeleton                                 &skeleton)
 {
     std::unordered_map<std::string, Animation> animations(asset.animations.size());
 
@@ -542,7 +542,8 @@ std::unordered_map<std::string, Animation> loadAnimation(fastgltf::Asset        
 
             auto [min, max]             = gl2MinMax(timeAccessor);
             animation.animationDuration = static_cast<float>(max - min);
-            if (animation.animationDuration = 0)
+            auto &dur                   = animation.animationDuration;
+            if (animation.animationDuration == 0)
             {
                 continue; // Skip animations with no duration
             }

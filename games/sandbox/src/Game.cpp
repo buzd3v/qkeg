@@ -1,11 +1,11 @@
 #include "Game.h"
-
 #include <utility>
 
 #include "Cubemap.h"
 #include "ECS/Component/Component.h"
-#include "ECS/System/TransformSystem.h"
 #include "JsonParser/JsonFile.h"
+
+#include "ECS/System/System.h"
 Game::Game() : Application() {}
 
 void Game::loadAppSetting()
@@ -34,6 +34,8 @@ void Game::customInit()
     animationPool = AnimationPool::GetInstance();
 
     enttLoader = new EntityLoader(registry, "static_geometry");
+    std::filesystem::path aniPath("assets/settings/animation.json");
+    animationPool->loadFromDirectory(aniPath);
     // init enttity
     initEntityLoader();
     registerComponent(enttLoader->getComponentLoader());
@@ -71,9 +73,13 @@ void Game::customInit()
                           aspectRatio);
     }
 
-    auto playerHandle = enttLoader->createEntityFromPrefab("cato");
+    playerHandle = enttLoader->createEntityFromPrefab("cato");
     { // init player
         playerHandle.emplace<PlayerComponent>();
+        auto &skeletonComp = playerHandle.get<SkeletonComponent>();
+        auto &sc           = skeletonComp;
+        assert(sc.animations);
+        sc.animator.assignAnimation(sc.skeleton, sc.animations->at("Walk"));
         auto playerSpawnHandle = EnttUtil::findEnttByName<SpawnComponent>(registry, level.playerSpawn);
         if (playerSpawnHandle.entity() == entt::null)
         {
@@ -115,19 +121,14 @@ void Game::customInit()
             auto &tch = static_cast<TrackingCameraHandler &>(cameraManager.getHandler(trackingCameraTag));
             tch.trackingEntity(playerHandle, camera);
         }
-        cameraManager.setHandler(dynamicCameraTag);
+        // cameraManager.setHandler(dynamicCameraTag);
     }
-
-    // camera.setPosition(glm::vec3(31.7f, 0.6f, -12.3f));
-    // camera.setRotation(glm::quat(0.1099f, 0.57f, 0.00771f, -0.8090f));
-    // camera.setUseReverseYaxis(true);
-    // camera.setUseInverseDepth(true);
 }
 
 void Game::customUpdate(float dt)
 {
-    cameraManager.update(camera, dt);
-    cameraManager.handleInput(inputManager, camera, dt);
+    updateLogic(dt);
+    handleInput(dt);
 }
 
 void Game::customDraw()

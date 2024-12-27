@@ -15,6 +15,10 @@ std::string getPrefabNameFromSceneNode(const EntityLoader &el, const SceneNode &
 template <typename ComponentName>
 entt::handle findEnttByName(entt::registry &reg, std::string name);
 
+// animationm util
+void setAnimation(entt::handle handle, std::string animationName);
+void smoothRotate(entt::handle handle, glm::quat target, float time);
+
 } // namespace EnttUtil
 
 template <typename ComponentName>
