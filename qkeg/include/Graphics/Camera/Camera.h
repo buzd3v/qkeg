@@ -77,7 +77,7 @@ class Camera
     Transform       transform;
     glm::mat4       projection;
     ProjectionType  type;
-    DefaultPosition defPos;
+    DefaultPosition defPos = DefaultPosition::LeftCorner;
 
     float nearPlane{1.f};
     float farPlane{100.f};

@@ -50,11 +50,11 @@ struct Color
 
 namespace qConstant
 {
-constexpr inline int ANIMATION_FPS = 30;
+constexpr inline int ANIMATION_FPS = 60;
 constexpr inline int ROOT_JOINT_ID = 0;
 constexpr inline int MAX_LIGHT     = 1000;
 
 constexpr inline qColor::LinearColor DEFAUT_AMBIENT_COLOR = qColor::LinearColor{0.051f, 0.051f, 0.051f, 1.f};
-constexpr inline float DEFAULT_AMBIENT_INTENSITY{1.0f};
+constexpr inline float               DEFAULT_AMBIENT_INTENSITY{1.0f};
 
 } // namespace qConstant

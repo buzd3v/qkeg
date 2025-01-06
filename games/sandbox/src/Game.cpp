@@ -53,12 +53,12 @@ void Game::customInit()
     };
     gameImage = imagePool->createImage(createInfo);
 
-    inputManager.loadInputBinding("assets/settings/input_actions.json", "assets/settings/input_mapping.json");
+    inputManager->loadInputBinding("assets/settings/input_actions.json", "assets/settings/input_mapping.json");
 
     GameRenderer::Construct();
     renderer = GameRenderer::GetInstance();
     renderer->init(gpuDevice, params.renderSize);
-    std::filesystem::path levelPath("assets/levels/burger_joint.json");
+    std::filesystem::path levelPath("assets/levels/city.json");
     loadLevel(levelPath);
 
     { // create camera
@@ -201,7 +201,6 @@ void Game::initDrawObjects()
 
 void Game::loadLevel(std::filesystem::path &path)
 {
-    auto imagePooll = ImagePool::GetInstance();
     if (std::filesystem::exists(path))
     {
         level.loadLevelFile(path);
@@ -219,7 +218,7 @@ void Game::loadLevel(std::filesystem::path &path)
             std::string("front.jpg"),
             std::string("back.jpg"),
         };
-        const auto cubemapImageId = imagePooll->loadCubemap(level.cubemapPath, imgNames);
+        const auto cubemapImageId = imagePool->loadCubemap(level.cubemapPath, imgNames);
         renderer->setCubemapImage(cubemapImageId);
     }
     else

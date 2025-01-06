@@ -10,6 +10,6 @@ struct MeshDrawProps
     qTypes::MeshId     meshID{qTypes::NULL_MESH_ID};
     bool               shadow{true};
     // skinning mesh
-    const SkinningMesh *skinningMesh{nullptr};
-    std::uint32_t       jointMatrixIndex;
+    SkinningMesh *skinningMesh{nullptr};
+    std::uint32_t jointMatrixIndex;
 };

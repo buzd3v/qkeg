@@ -5,7 +5,9 @@
 #include <GLFW/glfw3.h>
 #include <filesystem>
 
-class InputManager
+#include "singleton_atomic.hpp"
+
+class InputManager : public SingletonAtomic<InputManager>
 {
   public:
     void init(GLFWwindow *window);

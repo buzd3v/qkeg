@@ -2,7 +2,7 @@
 add_subdirectory(glm)
 
 # glfw
-add_subdirectory(glfw)
+# add_subdirectory(glfw)
 
 # stb
 # add_subdirectory(stb)

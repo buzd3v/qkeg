@@ -34,3 +34,6 @@
 [submodule "qkeg/third_party/entt"]
 	path = qkeg/third_party/entt
 	url = https://github.com/skypjack/entt
+[submodule "qkeg/third_party/soloud"]
+	path = qkeg/third_party/soloud
+	url = https://github.com/jarikomppa/soloud.git

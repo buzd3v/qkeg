@@ -4,7 +4,6 @@
 #include <volk.h>
 #include <VkBootstrap.h>
 // clang-format on
-#include "Core/DeletionQueue.h"
 #include "VkInitializer.h"
 #include "VkUtil.h"
 
@@ -60,6 +59,4 @@ class Swapchain
     bool                     shouldRecreate{false};
 
     std::array<FrameData, Graphics::FRAME_ON_FLIGHT> frames;
-
-    DeletionQueue deletionQueue;
 };

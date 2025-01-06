@@ -1,4 +1,25 @@
 find_package(Vulkan REQUIRED)
+
+# Dependencies
+set(RAYLIB_VERSION 5.5)
+find_package(raylib ${RAYLIB_VERSION} QUIET) # QUIET or REQUIRED
+
+if(NOT raylib_FOUND) # If there's none, fetch and build raylib
+  include(FetchContent)
+  FetchContent_Declare(
+    raylib
+    DOWNLOAD_EXTRACT_TIMESTAMP OFF
+    URL https://github.com/raysan5/raylib/archive/refs/tags/${RAYLIB_VERSION}.tar.gz
+  )
+  FetchContent_GetProperties(raylib)
+
+  if(NOT raylib_POPULATED) # Have we downloaded raylib yet?
+    set(FETCHCONTENT_QUIET NO)
+    FetchContent_MakeAvailable(raylib)
+    set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE) # don't build the supplied examples
+  endif()
+endif()
+
 add_subdirectory(third_party)
 
 # add_subdirectory(tools)
@@ -48,9 +69,11 @@ add_library(qkeg
   src/Graphics/Pipeline/MeshPipeline.cpp
   src/Graphics/Pipeline/SkeletonPipeline.cpp
   src/Graphics/Pipeline/CubemapPipeline.cpp
+  src/Graphics/Pipeline/SpritePipeline.cpp
 
   # renderer files
   src/Graphics/Renderer/GameRenderer.cpp
+  src/Graphics/Renderer/Renderer2D.cpp
   src/Graphics/Renderer/Scene.cpp
   src/Graphics/Renderer/Light.cpp
   src/Graphics/Renderer/ScenePool.cpp
@@ -58,6 +81,7 @@ add_library(qkeg
   src/Graphics/Camera/Camera.cpp
   src/Graphics/Renderer/Animation.cpp
   src/Graphics/Renderer/AnimationPool.cpp
+  src/Graphics/Renderer/Sprite.cpp
 
   # math files
   src/Math/Transform.cpp
@@ -72,6 +96,7 @@ add_library(qkeg
   src/ECS/System/MovementSystem.cpp
 
   # Level
+  src/Level/GameScene.cpp
   src/Level/Level.cpp
 )
 
@@ -92,7 +117,6 @@ target_include_directories(qkeg
   "${CMAKE_CURRENT_LIST_DIR}/third_party/singleton/include"
   "${CMAKE_CURRENT_LIST_DIR}/third_party/entt/src"
 
-  # "${CMAKE_CURRENT_LIST_DIR}/include"
   PRIVATE
   ${Vulkan_INCLUDE_DIRS}
 )
@@ -110,6 +134,7 @@ target_link_libraries(qkeg
   Vulkan::Vulkan
   singleton::singleton-atomic
   fastgltf::fastgltf
+  raylib
 )
 
 target_compile_definitions(qkeg PUBLIC VK_NO_PROTOTYPES VK_USE_PLATFORM_WIN32_KHR VMA_VULKAN_VERSION=1003000 NOMINMAX)

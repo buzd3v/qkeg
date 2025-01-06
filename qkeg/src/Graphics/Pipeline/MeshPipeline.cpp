@@ -65,7 +65,7 @@ void MeshPipeline::draw(VkCommandBuffer cmd, GPUDevice &device, VkExtent2D rende
     };
     vkCmdSetScissor(cmd, 0, 1, &scissor);
 
-    for (auto drawProp : drawProps)
+    for (auto &drawProp : drawProps)
     {
         // Draw mesh
         auto mesh = meshPool->getMesh(drawProp.meshID);
@@ -73,12 +73,13 @@ void MeshPipeline::draw(VkCommandBuffer cmd, GPUDevice &device, VkExtent2D rende
         vkCmdBindIndexBuffer(cmd, mesh.indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT32);
 
         // Submit push constants
-        const auto pushConstant = PushConstant{
-            .vertexBufferAddress = mesh.vertexBuffer.address,
-            .sceneDataBuffer     = sceneData.address,
-            .transform           = drawProp.transform,
-            .materialId          = drawProp.materialID,
-            .padding             = 0,
+        auto       vertexDataAddr = mesh.vertexBuffer.address;
+        const auto pushConstant   = PushConstant{
+              .vertexBufferAddress = vertexDataAddr,
+              .sceneDataBuffer     = sceneData.address,
+              .transform           = drawProp.transform,
+              .materialId          = drawProp.materialID,
+              .padding             = 0,
         };
 
         vkCmdPushConstants(cmd,

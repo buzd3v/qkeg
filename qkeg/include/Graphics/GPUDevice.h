@@ -1,3 +1,4 @@
+
 #pragma once
 
 // clang-format off
@@ -7,7 +8,6 @@
 #include <vk_mem_alloc.h>
 // clang-format on
 
-#include "Core/DeletionQueue.h"
 #include "Graphics/Common.h"
 #include "Vulkan/BindlessDescriptor.h"
 #include "Vulkan/ImagePool.h"
@@ -27,6 +27,9 @@ struct Version
     Version(int major, int minor, int patch) : major(major), minor(minor), patch(patch){};
 };
 
+/**
+ * @brief Encapsulate Vulkan API
+ */
 class GPUDevice
 {
   public:
@@ -95,8 +98,6 @@ class GPUDevice
     VkSampleCountFlagBits highestSampleCount;
 
     std::array<FrameData, Graphics::FRAME_ON_FLIGHT> frames;
-
-    DeletionQueue deletionQueue;
 
     // testing
 };

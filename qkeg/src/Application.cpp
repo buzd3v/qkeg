@@ -53,7 +53,10 @@ void Application::init(const Params &ps)
     }
 
     gpuDevice.init(window, params.appName.c_str(), Version(1, 1, 1));
-    inputManager.init(window);
+
+    InputManager::Construct();
+    inputManager = InputManager::GetInstance();
+    inputManager->init(window);
 
     customInit();
 }
@@ -101,9 +104,9 @@ void Application::run()
         //     }
         // }
         {
-            inputManager.onNewFrame(); // reset input state on new frame
-            glfwPollEvents();          // manage glfw window polling
-            inputManager.update(dt);
+            inputManager->onNewFrame(); // reset input state on new frame
+            glfwPollEvents();           // manage glfw window polling
+            inputManager->update(dt);
             customUpdate(dt);
         }
 

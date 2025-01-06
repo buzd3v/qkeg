@@ -4,13 +4,13 @@
 #include "glm/glm.hpp"
 void Game::handleInput(float dt)
 {
-    cameraManager.handleInput(inputManager, camera, dt);
+    cameraManager.handleInput(*inputManager, camera, dt);
     handlePlayerInput(dt);
 }
 
 void Game::handlePlayerInput(float dt)
 {
-    const auto       &actionBind        = inputManager.getActionBinding();
+    const auto       &actionBind        = inputManager->getActionBinding();
     static const auto horizonalWalkAxis = actionBind.getActionName("MoveX");
     static const auto verticalWalkAxis  = actionBind.getActionName("MoveY");
 

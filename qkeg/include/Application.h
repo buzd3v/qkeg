@@ -48,7 +48,7 @@ class Application
     GLFWwindow *window;
 
   protected:
-    InputManager inputManager;
-    GPUDevice    gpuDevice;
-    Params       params{};
+    InputManager *inputManager;
+    GPUDevice     gpuDevice;
+    Params        params{};
 };

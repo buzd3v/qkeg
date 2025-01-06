@@ -22,6 +22,8 @@ add_executable(sandbox
   src/CameraManager.cpp
   src/DynamicCameraHandler.cpp
   src/TrackingCameraHandler.cpp
+
+  src/Levels/EntryLevel.cpp
 )
 
 set_target_properties(sandbox PROPERTIES
