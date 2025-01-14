@@ -1,0 +1,8 @@
+{
+  "collider": {},
+  "physics": {
+    "type": "static",
+    "originType": "center",
+    "bodyType": "mesh"
+  }
+}

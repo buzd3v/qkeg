@@ -1,0 +1,6 @@
+{
+  "physics": {
+    "type": "static",
+    "bodyType": "mesh"
+  }
+}

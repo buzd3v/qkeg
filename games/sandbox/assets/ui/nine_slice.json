@@ -1,0 +1,6 @@
+{
+  "texture": "assets/images/ui/nine_slice.png",
+  "textureCoords": {
+    "contents": [ 5, 5, 1, 1]
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "trigger": {},
+  "physics": {
+    "type": "static",
+    "sensor": true,
+    "bodyType": "aabb",
+    "originType": "center"
+  }
+}

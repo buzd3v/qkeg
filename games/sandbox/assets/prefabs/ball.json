@@ -1,0 +1,8 @@
+{
+    "scene": {
+      "scene": "assets/models/ball.gltf"
+    },
+    "physics": {
+      "type": "dynamic"
+    }
+}
