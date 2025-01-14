@@ -77,7 +77,7 @@ void SkeletonPipeline::startDrawing(std::size_t frameIndex)
 std::size_t SkeletonPipeline::addJointMatrices(std::span<const glm::mat4> jointMatrices, std::size_t frameIndex)
 {
     auto      &jointMatrix = retrieveFrameResources(frameIndex).jointMatrices;
-    const auto startIndex  = jointMatrices.size();
+    const auto startIndex  = jointMatrix.currentSize;
     jointMatrix.appendRange(jointMatrices);
     return startIndex;
 }

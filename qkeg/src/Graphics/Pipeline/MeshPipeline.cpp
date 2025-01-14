@@ -75,11 +75,12 @@ void MeshPipeline::draw(VkCommandBuffer cmd, GPUDevice &device, VkExtent2D rende
         // Submit push constants
         auto       vertexDataAddr = mesh.vertexBuffer.address;
         const auto pushConstant   = PushConstant{
-              .vertexBufferAddress = vertexDataAddr,
-              .sceneDataBuffer     = sceneData.address,
-              .transform           = drawProp.transform,
-              .materialId          = drawProp.materialID,
-              .padding             = 0,
+              .vertexBufferAddress =
+                drawProp.skinningMesh ? drawProp.skinningMesh->skinnedVertexBuffer.address : vertexDataAddr,
+              .sceneDataBuffer = sceneData.address,
+              .transform       = drawProp.transform,
+              .materialId      = drawProp.materialID,
+              .padding         = 0,
         };
 
         vkCmdPushConstants(cmd,

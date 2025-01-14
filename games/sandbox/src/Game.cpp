@@ -59,7 +59,6 @@ void Game::customInit()
     renderer = GameRenderer::GetInstance();
     renderer->init(gpuDevice, params.renderSize);
     std::filesystem::path levelPath("assets/levels/city.json");
-    loadLevel(levelPath);
 
     { // create camera
         static const float aspectRatio = (float)params.renderSize.x / (float)params.renderSize.y;
@@ -72,14 +71,14 @@ void Game::customInit()
                           qConstant::DEFAULT_FAR_PLANE,
                           aspectRatio);
     }
-
+    loadLevel(levelPath);
     playerHandle = enttLoader->createEntityFromPrefab("cato");
     { // init player
         playerHandle.emplace<PlayerComponent>();
         auto &skeletonComp = playerHandle.get<SkeletonComponent>();
         auto &sc           = skeletonComp;
         assert(sc.animations);
-        sc.animator.assignAnimation(sc.skeleton, sc.animations->at("Walk"));
+        sc.animator.assignAnimation(sc.skeleton, sc.animations->at("Idle"));
         auto playerSpawnHandle = EnttUtil::findEnttByName<SpawnComponent>(registry, level.playerSpawn);
         if (playerSpawnHandle.entity() == entt::null)
         {
@@ -165,7 +164,6 @@ void Game::initDrawObjects()
 {
 
     renderer->collectDataBegin(gpuDevice);
-
     // colect light data
     const auto light = registry.view<LightComponent, TransformComponent>();
     for (auto &&[entity, light, transform] : light.each())

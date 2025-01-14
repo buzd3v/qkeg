@@ -53,7 +53,7 @@ void Game::updateLogic(float dt)
     MovementSystem::update(registry, dt);
     cameraManager.update(camera, dt);
 
-    // TransformSystem::update(registry, dt);
+    TransformSystem::update(registry, dt);
     if (playerHandle.entity() != entt::null)
     {
         PlayerSkeletonSystem::update(playerHandle, dt);

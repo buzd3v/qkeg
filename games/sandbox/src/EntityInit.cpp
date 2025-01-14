@@ -110,4 +110,9 @@ void Game::initAnimationEntity(entt::handle handle)
                 .build();
         skeletonComponent.skinMeshes.push_back(skinMesh);
     }
+    if (skeletonComponent.animations->contains("Idle"))
+    {
+        skeletonComponent.animator.assignAnimation(skeletonComponent.skeleton,
+                                                   skeletonComponent.animations->at("Idle"));
+    }
 }

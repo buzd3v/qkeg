@@ -15,8 +15,8 @@ class DynamicBuffer
     {
         assert((currentSize + elements.size()) <= maxCapacity && "Buffer overflow detected.");
 
-        auto *mappedData = static_cast<T *>(gpuBuffer.info.pMappedData);
-        std::memcpy(&mappedData[currentSize], elements.data(), elements.size() * sizeof(T));
+        auto mappedData = (T *)(gpuBuffer.info.pMappedData);
+        std::memcpy((void *)&mappedData[currentSize], elements.data(), elements.size() * sizeof(T));
 
         currentSize += elements.size();
     }

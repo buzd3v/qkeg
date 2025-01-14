@@ -23,7 +23,7 @@ void PlayerSkeletonSystem::update(entt::handle player, float dt)
             animator.getCurrentAnimName() == "Jump" || animator.getCurrentAnimName() == "Fall")
         {
             // eu::setAnimation(player, "Think");a
-            EnttUtil::setAnimation(player, "Walk");
+            EnttUtil::setAnimation(player, "Idle");
         }
     }
     else
