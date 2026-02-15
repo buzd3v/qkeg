@@ -8,7 +8,7 @@
 #include "Renderer/ScenePool.h"
 #include "Vulkan/ImagePool.h"
 
-void GameScene::init(GPUDevice &device, std::string name, glm::vec2 renderSize)
+void GameScene::init(GPUDevice &device, std::string name, glm::ivec2 renderSize)
 {
     this->device    = &device;
     scenePool       = ScenePool::GetInstance();
@@ -18,5 +18,6 @@ void GameScene::init(GPUDevice &device, std::string name, glm::vec2 renderSize)
     imagePool       = ImagePool::GetInstance();
     inputManager    = InputManager::GetInstance();
     renderer        = GameRenderer::GetInstance();
+    soundPool       = SoundPool::GetInstance();
     this->sceneName = name;
 }

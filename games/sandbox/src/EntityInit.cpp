@@ -1,17 +1,6 @@
 #include "ECS/Component/Component.h"
 #include "Game.h"
-
-void forEach(const std::filesystem::path &dir, std::function<void(const std::filesystem::path &)> func)
-{
-    for (const auto &file : std::filesystem::recursive_directory_iterator(dir))
-    {
-        if (std::filesystem::is_regular_file(file))
-        {
-            func(file.path());
-        }
-    }
-}
-
+#include "GameUtil.h"
 void Game::initEntityLoader()
 {
     enttLoader->setDefaultInitCallback([](entt::registry &registry) {
@@ -23,7 +12,7 @@ void Game::initEntityLoader()
     });
 
     auto prefabsDir = std::filesystem::path("assets/prefabs");
-    forEach(prefabsDir, [this, &prefabsDir](const std::filesystem::path &path) {
+    GameUtil::forEachFileInDir(prefabsDir, [this, &prefabsDir](const std::filesystem::path &path) {
         auto       relPath  = path.lexically_relative(prefabsDir);
         const auto fileName = relPath.replace_extension("").string();
         enttLoader->registerPrefab(fileName, path);
@@ -49,19 +38,6 @@ void Game::registerComponent(ComponentLoader &loader)
     });
 }
 
-std::string capComponentNodeName(std::string name)
-{
-    if (name.empty())
-    {
-        return {};
-    }
-    auto dotPos = name.find_last_of(".");
-    if (dotPos == std::string::npos || dotPos == name.size() - 1)
-    {
-    }
-    return name.substr(dotPos + 1, name.size());
-}
-
 void Game::postInitEnttCallback(entt::handle handle)
 {
     entt::entity entt              = handle.entity();
@@ -78,7 +54,7 @@ void Game::postInitEnttCallback(entt::handle handle)
         {
             return; // do not registering any for this component
         }
-        handle.get_or_emplace<NameComponent>().name = capComponentNodeName(name);
+        handle.get_or_emplace<NameComponent>().name = GameUtil::capComponentNodeName(name);
     }
     for (const auto &c : handle.get<HierarchyComponent>().children)
     {

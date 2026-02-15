@@ -13,7 +13,8 @@
         "MenuBack",
         "CameraMoveFast",
         "ToggleFreeCamera",
-        "ToggleImGuiVisibility"
+        "ToggleImGuiVisibility",
+        "ChangeLevel_Cheat"
     ],
     "axes": [
         "MoveX",

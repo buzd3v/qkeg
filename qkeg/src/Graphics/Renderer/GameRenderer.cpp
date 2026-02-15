@@ -59,7 +59,7 @@ void GameRenderer::draw(GPUDevice &device, VkCommandBuffer cmd, Camera &camera, 
             }
             skeletonPipeline.performSkinning(cmd, device.getCurrentFrameIndex(), drawProp);
         }
-        { // Sync skinning witj next pipeline
+        { // Sync skinning with next pipeline
             const auto memoryBarrier = VkMemoryBarrier2{
                 .sType         = VK_STRUCTURE_TYPE_MEMORY_BARRIER_2,
                 .srcStageMask  = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT,

@@ -1,19 +1,23 @@
 #pragma once
 #include "Sound.h"
+#include <singleton_atomic.hpp>
 #include <unordered_map>
-class SoundPool
+
+class SoundPool : public SingletonAtomic<SoundPool>
 {
+  public:
     SoundPool()
     {
         InitAudioDevice(); // Ensure audio device is initialized
     }
-    ~SoundPool()
+
+    void loadSound(const std::string &name, const std::string &filePath) { audios[name] = Audio(filePath); }
+
+    void cleanUp()
     {
         audios.clear();
         CloseAudioDevice();
     }
-
-    void loadSound(const std::string &name, const std::string &filePath) { audios[name] = Audio(filePath); }
 
     Audio *getSound(const std::string &name)
     {
@@ -24,6 +28,6 @@ class SoundPool
         return nullptr;
     }
 
-  private:
+  protected:
     std::unordered_map<std::string, Audio> audios{}; // Changed Sound to Audio
 };

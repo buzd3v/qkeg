@@ -43,18 +43,16 @@ void main()
     }
 
     SkeletonData sd = pcs.skeletonBuffer.data[index];
-    mat4 skinMatrix =
-        sd.weight.x * getJointMatrix(sd.jointId.x) +
-        sd.weight.y * getJointMatrix(sd.jointId.y) +
-        sd.weight.z * getJointMatrix(sd.jointId.z) +
-        sd.weight.w * getJointMatrix(sd.jointId.w);
+
+    // Use only the primary joint (sd.jointId.x) for rigid skinning
+    mat4 skinMatrix = getJointMatrix(sd.jointId.x);
 
     Vertex v = pcs.inputBuffer.vertices[index];
     v.position = vec3(skinMatrix * vec4(v.position, 1.0));
 
     mat3 skinMat3 = mat3(skinMatrix);
     v.normal = skinMat3 * v.normal;
-    v.tangent.xyz = skinMat3 * v.tangent.xyz; // don't transform tangent.w
+    v.tangent.xyz = skinMat3 * v.tangent.xyz; // Don't transform tangent.w
 
     pcs.outBuffer.vertices[index] = v;
 }

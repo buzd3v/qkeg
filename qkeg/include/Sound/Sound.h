@@ -1,5 +1,7 @@
 #pragma once
-#include "raylib.h"
+
+#undef PlaySound
+#include "raudio.h"
 #include <string>
 class Audio
 {
@@ -8,7 +10,8 @@ class Audio
     Audio(const std::string &filePath)
     {
         sound = LoadSound(filePath.c_str());
-        name  = filePath; // Use filePath as the default name.
+        assert(sound.stream.buffer != NULL);
+        name = filePath; // Use filePath as the default name.
     }
     ~Audio()
     {
@@ -22,6 +25,7 @@ class Audio
     {
         if (sound.stream.buffer)
         {
+            SetSoundVolume(sound, 1.f);
             PlaySound(sound);
         }
     }

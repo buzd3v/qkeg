@@ -97,6 +97,7 @@ add_library(qkeg
 
   # Level
   src/Level/GameScene.cpp
+  src/Level/GameScenePool.cpp
   src/Level/Level.cpp
 )
 
@@ -116,6 +117,7 @@ target_include_directories(qkeg
   "${CMAKE_CURRENT_LIST_DIR}/third_party"
   "${CMAKE_CURRENT_LIST_DIR}/third_party/singleton/include"
   "${CMAKE_CURRENT_LIST_DIR}/third_party/entt/src"
+  "${CMAKE_CURRENT_LIST_DIR}/third_party/raudio/src"
 
   PRIVATE
   ${Vulkan_INCLUDE_DIRS}
@@ -134,7 +136,9 @@ target_link_libraries(qkeg
   Vulkan::Vulkan
   singleton::singleton-atomic
   fastgltf::fastgltf
-  raylib
+
+  # raylib
+  raudio
 )
 
 target_compile_definitions(qkeg PUBLIC VK_NO_PROTOTYPES VK_USE_PLATFORM_WIN32_KHR VMA_VULKAN_VERSION=1003000 NOMINMAX)

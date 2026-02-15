@@ -1,6 +1,7 @@
 #include "ECS/System/PlayerSkeletonSystem.h"
 #include "ECS/Component/Component.h"
 #include "ECS/EntityUtil.h"
+#include "Sound/SoundPool.h"
 void PlayerSkeletonSystem::update(entt::handle player, float dt)
 {
     auto &movementComponent = player.get<MovementComponent>();
@@ -23,7 +24,7 @@ void PlayerSkeletonSystem::update(entt::handle player, float dt)
             animator.getCurrentAnimName() == "Jump" || animator.getCurrentAnimName() == "Fall")
         {
             // eu::setAnimation(player, "Think");a
-            EnttUtil::setAnimation(player, "Idle");
+            EnttUtil::setAnimation(player, "Run");
         }
     }
     else

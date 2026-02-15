@@ -1,6 +1,6 @@
 #pragma once
 #include "Application.h"
-
+#include "Level/GameScenePool.h"
 #include <entt/entt.hpp>
 
 #include "Graphics/GPUDevice.h"
@@ -54,6 +54,7 @@ class Game : public Application
     ImagePool       *imagePool;
     ScenePool       *scenePool;
     AnimationPool   *animationPool;
+    GameScenePool   *gamePool;
 
     CameraManager cameraManager;
     std::string   dynamicCameraTag{"dynamic"};

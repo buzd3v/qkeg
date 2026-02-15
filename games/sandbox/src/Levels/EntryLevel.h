@@ -12,14 +12,13 @@
 #include "ECS/EntityLoader.h"
 #include "ECS/EntityUtil.h"
 #include "Game.h"
-
 class EntryScene : public GameScene
 {
   public:
-    void init(GPUDevice &device, std::string name, glm::vec2 renderSize);
+    void init(GPUDevice &device, std::string name, glm::ivec2 renderSize);
     void update(float dt) override;
-    void handleInput() override;
-    void updateGameLogic() override;
+    void handleInput(float dt) override;
+    void updateGameLogic(float dt) override;
     void draw() override;
 
     void initDrawObjects();
@@ -41,4 +40,6 @@ class EntryScene : public GameScene
     entt::registry registry;
     entt::handle   playerHandle;
     EntityLoader  *enttLoader;
+
+    glm::ivec2 windowSize;
 };

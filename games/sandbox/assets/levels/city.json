@@ -1,5 +1,5 @@
 {
-  "scene": "assets/models/levels/city/city.gltf",
+  "scene": "assets/models/levels/city/cityLight.gltf",
   "skybox": "assets/images/skybox/distant_sunset",
   "default_spawn": "Store",
   "ambient": {

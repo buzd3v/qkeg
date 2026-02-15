@@ -12,7 +12,8 @@
       "CursorDown": ["S", "Down"],
       "MenuConfirm": ["F", "Backspace"],
       "MenuBack": ["Escape"],
-      "CameraMoveFast": ["Left Shift"]
+      "CameraMoveFast": ["Left Shift"],
+      "ChangeLevel_Cheat": ["Escape"]
     },
     "axisButton": [
       {
@@ -36,22 +37,22 @@
         "scale": 1.0
       },
       {
-        "key": "A",
+        "key": "J",
         "tag": "CameraMoveX",
         "scale": -1.0
       },
       {
-        "key": "D",
+        "key": "L",
         "tag": "CameraMoveX",
         "scale": 1.0
       },
       {
-        "key": "W",
+        "key": "I",
         "tag": "CameraMoveY",
         "scale": -1.0
       },
       {
-        "key": "S",
+        "key": "K",
         "tag": "CameraMoveY",
         "scale": 1.0
       },
