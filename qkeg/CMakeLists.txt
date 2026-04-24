@@ -4,21 +4,21 @@ find_package(Vulkan REQUIRED)
 set(RAYLIB_VERSION 5.5)
 find_package(raylib ${RAYLIB_VERSION} QUIET) # QUIET or REQUIRED
 
-if(NOT raylib_FOUND) # If there's none, fetch and build raylib
-  include(FetchContent)
-  FetchContent_Declare(
-    raylib
-    DOWNLOAD_EXTRACT_TIMESTAMP OFF
-    URL https://github.com/raysan5/raylib/archive/refs/tags/${RAYLIB_VERSION}.tar.gz
-  )
-  FetchContent_GetProperties(raylib)
+# if(NOT raylib_FOUND) # If there's none, fetch and build raylib
+#   include(FetchContent)
+#   FetchContent_Declare(
+#     raylib
+#     DOWNLOAD_EXTRACT_TIMESTAMP OFF
+#     URL https://github.com/raysan5/raylib/archive/refs/tags/${RAYLIB_VERSION}.tar.gz
+#   )
+#   FetchContent_GetProperties(raylib)
 
-  if(NOT raylib_POPULATED) # Have we downloaded raylib yet?
-    set(FETCHCONTENT_QUIET NO)
-    FetchContent_MakeAvailable(raylib)
-    set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE) # don't build the supplied examples
-  endif()
-endif()
+#   if(NOT raylib_POPULATED) # Have we downloaded raylib yet?
+#     set(FETCHCONTENT_QUIET NO)
+#     FetchContent_MakeAvailable(raylib)
+#     set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE) # don't build the supplied examples
+#   endif()
+# endif()
 
 include("${CMAKE_CURRENT_LIST_DIR}/../cmake/QkegDependencies.cmake")
 
@@ -134,8 +134,8 @@ target_link_libraries(qkeg
   GPUOpen::VulkanMemoryAllocator
   singleton::singleton-atomic
   singleton::singleton-dclp
-  stb::image
-  raudio
+  # stb::image
+  # raudio
   PRIVATE
   Vulkan::Vulkan
   fastgltf::fastgltf

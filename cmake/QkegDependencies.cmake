@@ -1,19 +1,51 @@
+if(NOT COMMAND CPMAddPackage)
+  include("${CMAKE_CURRENT_LIST_DIR}/CPM.cmake")
+endif()
+
 # glm
-add_subdirectory(glm)
+CPMAddPackage(
+  NAME glm
+  GITHUB_REPOSITORY g-truc/glm
+  GIT_TAG 33b4a621a697a305bc3a7610d290677b96beb181
+  OPTIONS
+    "GLM_BUILD_TESTS OFF"
+)
 
 # glfw
-# add_subdirectory(glfw)
+CPMAddPackage(
+  NAME glfw
+  GITHUB_REPOSITORY glfw/glfw
+  GIT_TAG 3.4
+  OPTIONS
+    "GLFW_BUILD_DOCS OFF"
+    "GLFW_BUILD_TESTS OFF"
+    "GLFW_BUILD_EXAMPLES OFF"
+    "GLFW_INSTALL OFF"
+)
 
 # stb
-# add_subdirectory(stb)
+# The recorded submodule pin 2e2bef463a5b53ddf8bb788e25da6b8506314c08 is no
+# longer fetchable upstream, so use the current working remote HEAD instead.
+CPMAddPackage(
+  NAME stb
+  GIT_REPOSITORY https://github.com/nothings/stb.git
+  GIT_TAG master
+  DOWNLOAD_ONLY YES
+)
 
 # singleton
-add_subdirectory(singleton)
+CPMAddPackage(
+  NAME singleton
+  GITHUB_REPOSITORY jimmy-park/singleton
+  GIT_TAG 9d5420e558ec0d966652f7ec55fbb344038d8046
+)
 
 # entt
-add_subdirectory(entt)
-
-add_subdirectory(raudio)
+CPMAddPackage(
+  NAME entt
+  GITHUB_REPOSITORY skypjack/entt
+  GIT_TAG 42d9628d39c579ae9f337018a96dc74b7122a496
+)
 
 # # SDL
 # if (NOT BUILD_SHARED_LIBS)
@@ -24,7 +56,14 @@ add_subdirectory(raudio)
 # add_subdirectory(SDL)
 
 # vk-bootstrap
-add_subdirectory(vk-bootstrap)
+CPMAddPackage(
+  NAME vk-bootstrap
+  GITHUB_REPOSITORY charles-lunarg/vk-bootstrap
+  GIT_TAG e3d07c49cbfb93ea62d2ec0a52c6d908c00d5269
+  OPTIONS
+    "VK_BOOTSTRAP_TEST OFF"
+    "VK_BOOTSTRAP_INSTALL OFF"
+)
 
 if(MSVC)
     target_compile_definitions(vk-bootstrap PRIVATE $<$<CONFIG:Debug>:_ITERATOR_DEBUG_LEVEL=1>)
@@ -37,13 +76,67 @@ if(BUILD_SHARED_LIBS)
 endif()
 
 # vma
-add_subdirectory(vma)
+CPMAddPackage(
+  NAME VMA
+  GITHUB_REPOSITORY GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator
+  GIT_TAG 1c35ba99ce775f8342d87a83a3f0f696f99c2a39
+  OPTIONS
+    "VMA_ENABLE_INSTALL OFF"
+)
 
 # volk
-add_subdirectory(volk)
+CPMAddPackage(
+  NAME volk
+  GITHUB_REPOSITORY zeux/volk
+  GIT_TAG 086957f3b39ac0a37fb7f344a523bef9b194ba8f
+  OPTIONS
+    "VOLK_INSTALL OFF"
+)
 
 # fastgltf
-add_subdirectory(fastgltf)
+# The recorded submodule pin 9d56da8490bf9534009e9425851c82e8c0d217a8 is no
+# longer fetchable upstream, so use the current working remote commit instead.
+CPMAddPackage(
+  NAME fastgltf
+  GITHUB_REPOSITORY spnda/fastgltf
+  GIT_TAG 48b3ac7c86d552c95186b366d107fa2dc7ef1249
+  OPTIONS
+    "FASTGLTF_ENABLE_TESTS OFF"
+    "FASTGLTF_ENABLE_EXAMPLES OFF"
+    "FASTGLTF_ENABLE_DOCS OFF"
+)
+
+if(MSVC)
+    target_compile_definitions(fastgltf PRIVATE $<$<CONFIG:Debug>:_ITERATOR_DEBUG_LEVEL=1>)
+endif()
+
+# raudio
+# raylib 5.5 no longer ships raudio.h; fetch the standalone audio module and
+# wrap it as a normal CMake target.
+# CPMAddPackage(
+#   NAME raudio
+#   GITHUB_REPOSITORY raysan5/raudio
+#   GIT_TAG 811c150fe97a2abb8ec67857dc52e022bfaa4e43
+#   DOWNLOAD_ONLY YES
+# )
+
+# if(NOT TARGET raudio)
+#   add_library(raudio STATIC "${raudio_SOURCE_DIR}/src/raudio.c")
+#   add_library(raudio::raudio ALIAS raudio)
+#   target_include_directories(raudio PUBLIC "${raudio_SOURCE_DIR}/src")
+#   target_compile_definitions(raudio
+#     PRIVATE
+#       SUPPORT_MODULE_RAUDIO
+#       RAUDIO_STANDALONE
+#       SUPPORT_FILEFORMAT_WAV
+#       SUPPORT_FILEFORMAT_OGG
+#       SUPPORT_FILEFORMAT_MP3
+#       SUPPORT_FILEFORMAT_QOA
+#       SUPPORT_FILEFORMAT_FLAC
+#       SUPPORT_FILEFORMAT_XM
+#       SUPPORT_FILEFORMAT_MOD
+#   )
+# endif()
 
 # ## Dear ImGui
 # set(IMGUI_SOURCES
@@ -136,12 +229,26 @@ add_subdirectory(fastgltf)
 # add_subdirectory(entt)
 
 # json
-option(JSON_MultipleHeaders "Use non-amalgamated version of the library." ON)
-option(JSON_Install "Install CMake targets during install step." OFF)
-add_subdirectory(json)
+CPMAddPackage(
+  NAME nlohmann_json
+  GITHUB_REPOSITORY nlohmann/json
+  GIT_TAG b36f4c477c40356a0ae1204b567cca3c2a57d201
+  OPTIONS
+    "JSON_MultipleHeaders ON"
+    "JSON_Install OFF"
+    "JSON_BuildTests OFF"
+)
 
 # fmt
-add_subdirectory(fmt)
+CPMAddPackage(
+  NAME fmt
+  GITHUB_REPOSITORY fmtlib/fmt
+  GIT_TAG c90bc918620b9b15d922f51f5f46667f9f588668
+  OPTIONS
+    "FMT_DOC OFF"
+    "FMT_TEST OFF"
+    "FMT_INSTALL OFF"
+)
 set_target_properties(fmt PROPERTIES
     PUBLIC_HEADER ""
 )

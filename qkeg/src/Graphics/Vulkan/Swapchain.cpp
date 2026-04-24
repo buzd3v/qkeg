@@ -175,7 +175,7 @@ std::pair<VkImage, std::uint32_t> Swapchain::acquireSwapchainImage(VkDevice &dev
 {
     std::uint32_t swapchainImageIndex{};
     const auto    result = vkAcquireNextImageKHR(
-        device, swapchain, VkUtil::TIMEOUT, frames[frameIndex].swapchainSemaphore, nullptr, &swapchainImageIndex);
+        device, swapchain, VkUtil::TIMEOUT, frames[frameIndex].swapchainSemaphore, VK_NULL_HANDLE , &swapchainImageIndex);
 
     if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
     {
