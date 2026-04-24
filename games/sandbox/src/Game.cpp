@@ -7,7 +7,7 @@
 
 #include "ECS/System/System.h"
 #include "Levels/EntryLevel.h"
-#include "Sound/SoundPool.h"
+// #include "Sound/SoundPool.h"
 Game::Game() : Application() {}
 
 void Game::loadAppSetting()
@@ -35,7 +35,7 @@ void Game::customInit()
     scenePool     = ScenePool::GetInstance();
     animationPool = AnimationPool::GetInstance();
 
-    SoundPool::Construct();
+    // SoundPool::Construct();
 
     inputManager->loadInputBinding("assets/settings/input_actions.json", "assets/settings/input_mapping.json");
     GameScenePool::Construct();

@@ -33,6 +33,12 @@ CPMAddPackage(
   DOWNLOAD_ONLY YES
 )
 
+# if(NOT TARGET stb::image)
+#   add_library(stb_image INTERFACE)
+#   add_library(stb::image ALIAS stb_image)
+#   target_include_directories(stb_image INTERFACE "${stb_SOURCE_DIR}")
+# endif()
+
 # singleton
 CPMAddPackage(
   NAME singleton

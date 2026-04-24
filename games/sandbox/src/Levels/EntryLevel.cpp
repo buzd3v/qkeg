@@ -97,9 +97,9 @@ void EntryScene::init(GPUDevice &device, std::string name, glm::ivec2 renderSize
         }
         // cameraManager.setHandler(dynamicCameraTag);
     }
-    auto sound = SoundPool::GetInstance()->getSound("step1");
-    assert(sound);
-    sound->play();
+    // auto sound = SoundPool::GetInstance()->getSound("step1");
+    // assert(sound);
+    // sound->play();
 }
 
 void EntryScene::update(float dt)

@@ -2,9 +2,8 @@
 
 #include "GPUDevice.h"
 #include <filesystem>
-#include <stb/stb_image.h>
+#include <stb_image.h>
 #include <vulkan/vulkan.h>
-
 struct GPUImage;
 
 struct RawImage

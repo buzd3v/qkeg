@@ -117,7 +117,8 @@ target_include_directories(qkeg
   PUBLIC
   "${CMAKE_CURRENT_LIST_DIR}/include"
   "${CMAKE_CURRENT_LIST_DIR}/include/Graphics"
-
+  
+  "${stb_SOURCE_DIR}"
   PRIVATE
   ${Vulkan_INCLUDE_DIRS}
 )

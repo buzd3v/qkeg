@@ -18,6 +18,6 @@ void GameScene::init(GPUDevice &device, std::string name, glm::ivec2 renderSize)
     imagePool       = ImagePool::GetInstance();
     inputManager    = InputManager::GetInstance();
     renderer        = GameRenderer::GetInstance();
-    soundPool       = SoundPool::GetInstance();
+    // soundPool       = SoundPool::GetInstance();
     this->sceneName = name;
 }

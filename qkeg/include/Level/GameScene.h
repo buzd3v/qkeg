@@ -6,7 +6,7 @@ class GPUDevice;
 #include "Renderer/AnimationPool.h"
 #include "Renderer/GameRenderer.h"
 #include "Renderer/ScenePool.h"
-#include "Sound/SoundPool.h"
+// #include "Sound/SoundPool.h"
 
 class GameScene
 {
@@ -30,7 +30,7 @@ class GameScene
     MaterialPool  *materialPool;
     InputManager  *inputManager;
     GameRenderer  *renderer;
-    SoundPool     *soundPool;
+    // SoundPool     *soundPool;
 
     std::string sceneName;
 };
