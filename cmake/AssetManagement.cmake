@@ -11,10 +11,17 @@ function(symlink_assets target)
   set(GAME_ASSETS_PATH "${CMAKE_CURRENT_SOURCE_DIR}/assets")
   assert_dir_exists("${GAME_ASSETS_PATH}")
 
-  add_custom_command(TARGET ${target} POST_BUILD
-    COMMENT "Symlink assets from ${CMAKE_CURRENT_SOURCE_DIR}/assets to $<TARGET_FILE_DIR:${target}>/assets"
-    COMMAND ${CMAKE_COMMAND} -E create_symlink "${GAME_ASSETS_PATH}" "$<TARGET_FILE_DIR:${target}>/assets"
-  )
+  if(WIN32)
+    add_custom_command(TARGET ${target} POST_BUILD
+      COMMENT "Copy assets from ${CMAKE_CURRENT_SOURCE_DIR}/assets to $<TARGET_FILE_DIR:${target}>/assets"
+      COMMAND ${CMAKE_COMMAND} -E copy_directory "${GAME_ASSETS_PATH}" "$<TARGET_FILE_DIR:${target}>/assets"
+    )
+  else()
+    add_custom_command(TARGET ${target} POST_BUILD
+      COMMENT "Symlink assets from ${CMAKE_CURRENT_SOURCE_DIR}/assets to $<TARGET_FILE_DIR:${target}>/assets"
+      COMMAND ${CMAKE_COMMAND} -E create_symlink "${GAME_ASSETS_PATH}" "$<TARGET_FILE_DIR:${target}>/assets"
+    )
+  endif()
 endfunction()
 
 function(generate_spritesheets target)

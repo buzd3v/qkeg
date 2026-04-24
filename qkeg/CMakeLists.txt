@@ -20,7 +20,7 @@ if(NOT raylib_FOUND) # If there's none, fetch and build raylib
   endif()
 endif()
 
-add_subdirectory(third_party)
+include("${CMAKE_CURRENT_LIST_DIR}/../cmake/QkegDependencies.cmake")
 
 # add_subdirectory(tools)
 add_library(qkeg
@@ -69,11 +69,13 @@ add_library(qkeg
   src/Graphics/Pipeline/MeshPipeline.cpp
   src/Graphics/Pipeline/SkeletonPipeline.cpp
   src/Graphics/Pipeline/CubemapPipeline.cpp
-  src/Graphics/Pipeline/SpritePipeline.cpp
+  # Temporarily disabled: corresponding public header is missing from the repo.
+  # src/Graphics/Pipeline/SpritePipeline.cpp
 
   # renderer files
   src/Graphics/Renderer/GameRenderer.cpp
-  src/Graphics/Renderer/Renderer2D.cpp
+  # Temporarily disabled: corresponding public header is missing from the repo.
+  # src/Graphics/Renderer/Renderer2D.cpp
   src/Graphics/Renderer/Scene.cpp
   src/Graphics/Renderer/Light.cpp
   src/Graphics/Renderer/ScenePool.cpp
@@ -81,7 +83,8 @@ add_library(qkeg
   src/Graphics/Camera/Camera.cpp
   src/Graphics/Renderer/Animation.cpp
   src/Graphics/Renderer/AnimationPool.cpp
-  src/Graphics/Renderer/Sprite.cpp
+  # Temporarily disabled: corresponding public header is missing from the repo.
+  # src/Graphics/Renderer/Sprite.cpp
 
   # math files
   src/Math/Transform.cpp
@@ -114,10 +117,6 @@ target_include_directories(qkeg
   PUBLIC
   "${CMAKE_CURRENT_LIST_DIR}/include"
   "${CMAKE_CURRENT_LIST_DIR}/include/Graphics"
-  "${CMAKE_CURRENT_LIST_DIR}/third_party"
-  "${CMAKE_CURRENT_LIST_DIR}/third_party/singleton/include"
-  "${CMAKE_CURRENT_LIST_DIR}/third_party/entt/src"
-  "${CMAKE_CURRENT_LIST_DIR}/third_party/raudio/src"
 
   PRIVATE
   ${Vulkan_INCLUDE_DIRS}
@@ -129,16 +128,17 @@ target_link_libraries(qkeg
   glfw
   fmt::fmt
   nlohmann_json::nlohmann_json
+  EnTT::EnTT
   volk::volk_headers
   vk-bootstrap::vk-bootstrap
   GPUOpen::VulkanMemoryAllocator
+  singleton::singleton-atomic
+  singleton::singleton-dclp
+  stb::image
+  raudio
   PRIVATE
   Vulkan::Vulkan
-  singleton::singleton-atomic
   fastgltf::fastgltf
-
-  # raylib
-  raudio
 )
 
 target_compile_definitions(qkeg PUBLIC VK_NO_PROTOTYPES VK_USE_PLATFORM_WIN32_KHR VMA_VULKAN_VERSION=1003000 NOMINMAX)

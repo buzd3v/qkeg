@@ -1,9 +1,9 @@
 #include "EntryLevel.h"
-#include "GameUtil.h"
 
 #include "ECS/System/System.h"
 #include "Level/GameScenePool.h"
-#include "MainLevel.h"
+// Missing from the current tree; restore when MainLevel is added back.
+// #include "MainLevel.h"
 
 void EntryScene::init(GPUDevice &device, std::string name, glm::ivec2 renderSize)
 {
@@ -179,10 +179,7 @@ void EntryScene::handleInput(float dt)
     {
         if (inputManager->getKeyboard().isPressed(GLFW_KEY_ESCAPE))
         {
-            auto mainScene = std::make_shared<MainScene>();
-            mainScene->init(*device, "mainScene", windowSize);
-            GameScenePool::GetInstance()->pushGameScene("mainScene", mainScene);
-            GameScenePool::GetInstance()->changeGameScene("mainScene");
+            // Temporarily disabled: MainLevel.h is not present in this repo.
         }
     }
 }
@@ -246,12 +243,14 @@ void EntryScene::initEntityLoader()
         return entt::handle(registry, entity);
     });
 
-    auto prefabsDir = std::filesystem::path("assets/prefabs");
-    GameUtil::forEachFileInDir(prefabsDir, [this, &prefabsDir](const std::filesystem::path &path) {
-        auto       relPath  = path.lexically_relative(prefabsDir);
-        const auto fileName = relPath.replace_extension("").string();
-        enttLoader->registerPrefab(fileName, path);
-    });
+    // Temporarily disabled: GameUtil.h is missing from the repo, so prefab
+    // auto-registration stays off until the helper is restored.
+    // auto prefabsDir = std::filesystem::path("assets/prefabs");
+    // GameUtil::forEachFileInDir(prefabsDir, [this, &prefabsDir](const std::filesystem::path &path) {
+    //     auto       relPath  = path.lexically_relative(prefabsDir);
+    //     const auto fileName = relPath.replace_extension("").string();
+    //     enttLoader->registerPrefab(fileName, path);
+    // });
 }
 
 void EntryScene::registerComponent(ComponentLoader &loader)
@@ -271,14 +270,15 @@ void EntryScene::registerComponent(ComponentLoader &loader)
     loader.registerComponent("mesh", [](entt::handle handle, MeshComponent &comp, const JsonNode &node) {
         node.getIfExists("castShadow", comp.castShadow);
     });
-    loader.registerComponent("animation_sound",
-                             [](entt::handle handle, AnimationSoundComponent &sc, const JsonNode &node) {
-                                 sc.eventSounds = node.getNode("events").getKeyValueMapString();
-                                 for (auto &[name, soundPath] : sc.eventSounds)
-                                 {
-                                     SoundPool::GetInstance()->loadSound(name, soundPath);
-                                 }
-                             });
+    // Temporarily disabled: AnimationSoundComponent.h is not present in this repo.
+    // loader.registerComponent("animation_sound",
+    //                          [](entt::handle handle, AnimationSoundComponent &sc, const JsonNode &node) {
+    //                              sc.eventSounds = node.getNode("events").getKeyValueMapString();
+    //                              for (auto &[name, soundPath] : sc.eventSounds)
+    //                              {
+    //                                  SoundPool::GetInstance()->loadSound(name, soundPath);
+    //                              }
+    //                          });
 }
 
 void EntryScene::postInitEnttCallback(entt::handle handle)
@@ -297,7 +297,7 @@ void EntryScene::postInitEnttCallback(entt::handle handle)
         {
             return; // do not registering any for this component
         }
-        handle.get_or_emplace<NameComponent>().name = GameUtil::capComponentNodeName(name);
+        handle.get_or_emplace<NameComponent>().name = name;
     }
     for (const auto &c : handle.get<HierarchyComponent>().children)
     {
