@@ -142,7 +142,7 @@ target_link_libraries(qkeg
   fastgltf::fastgltf
 )
 
-target_compile_definitions(qkeg PUBLIC VK_NO_PROTOTYPES VK_USE_PLATFORM_WIN32_KHR VMA_VULKAN_VERSION=1003000 NOMINMAX)
+target_compile_definitions(qkeg PUBLIC VK_NO_PROTOTYPES VULKAN_HPP_NO_SPACESHIP_OPERATOR VK_USE_PLATFORM_WIN32_KHR VMA_VULKAN_VERSION=1003000 NOMINMAX)
 
 # glm
 target_compile_definitions(qkeg
