@@ -17,15 +17,15 @@ add_executable(sandbox
   # gamefile
   src/Game.cpp
   src/main.cpp
-  src/EntityInit.cpp
+  # Temporarily disabled: GameUtil.h is missing from the repo and these
+  # Game::* entity-init helpers are not used by the current startup path.
+  # src/EntityInit.cpp
   src/InputHandler.cpp
   src/CameraManager.cpp
   src/DynamicCameraHandler.cpp
   src/TrackingCameraHandler.cpp
-  src/GameUtil.cpp
 
   src/Levels/EntryLevel.cpp
-  src/Levels/MainLevel.cpp
 )
 
 set_target_properties(sandbox PROPERTIES

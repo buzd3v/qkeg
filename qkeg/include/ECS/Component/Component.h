@@ -1,6 +1,7 @@
 #pragma once
 
-#include "AnimationSoundComponent.h"
+// Missing from the current tree; restore when the header is added back.
+// #include "AnimationSoundComponent.h"
 #include "HierachyComponent.h"
 #include "LightComponent.h"
 #include "MeshComponent.h"
