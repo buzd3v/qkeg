@@ -1,6 +1,7 @@
 #include "EntryLevel.h"
 
 #include "ECS/System/System.h"
+#include "GameUtil.h"
 #include "Level/GameScenePool.h"
 // Missing from the current tree; restore when MainLevel is added back.
 // #include "MainLevel.h"
@@ -76,7 +77,7 @@ void EntryScene::init(GPUDevice &device, std::string name, glm::ivec2 renderSize
         cameraManager.addHandler(trackingCameraTag, std::move(trackCam));
 
         auto camEntt       = EnttUtil::findEnttByName<CameraComponent>(registry, level.cameraSpawn);
-        bool shouldProcess = true;
+        bool shouldProcess = false;
         if (camEntt.entity() == entt::null)
         {
             fmt::println("could not find {}", level.cameraSpawn);
@@ -243,14 +244,12 @@ void EntryScene::initEntityLoader()
         return entt::handle(registry, entity);
     });
 
-    // Temporarily disabled: GameUtil.h is missing from the repo, so prefab
-    // auto-registration stays off until the helper is restored.
-    // auto prefabsDir = std::filesystem::path("assets/prefabs");
-    // GameUtil::forEachFileInDir(prefabsDir, [this, &prefabsDir](const std::filesystem::path &path) {
-    //     auto       relPath  = path.lexically_relative(prefabsDir);
-    //     const auto fileName = relPath.replace_extension("").string();
-    //     enttLoader->registerPrefab(fileName, path);
-    // });
+    auto prefabsDir = std::filesystem::path("assets/prefabs");
+    GameUtil::forEachFileInDir(prefabsDir, [this, &prefabsDir](const std::filesystem::path &path) {
+        auto       relPath  = path.lexically_relative(prefabsDir);
+        const auto fileName = relPath.replace_extension("").string();
+        enttLoader->registerPrefab(fileName, path);
+    });
 }
 
 void EntryScene::registerComponent(ComponentLoader &loader)
@@ -297,7 +296,7 @@ void EntryScene::postInitEnttCallback(entt::handle handle)
         {
             return; // do not registering any for this component
         }
-        handle.get_or_emplace<NameComponent>().name = name;
+        handle.get_or_emplace<NameComponent>().name = GameUtil::capComponentNodeName(name);
     }
     for (const auto &c : handle.get<HierarchyComponent>().children)
     {

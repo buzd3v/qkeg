@@ -19,7 +19,7 @@ add_executable(sandbox
   src/main.cpp
   # Temporarily disabled: GameUtil.h is missing from the repo and these
   # Game::* entity-init helpers are not used by the current startup path.
-  # src/EntityInit.cpp
+  src/EntityInit.cpp
   src/InputHandler.cpp
   src/CameraManager.cpp
   src/DynamicCameraHandler.cpp
